@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Gateway Transaction Flow</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7fafc;font-family:Arial,Helvetica,sans-serif;color:#17365d}
+.page{width:1600px;margin:18px auto;background:#fff;padding:0 18px 18px}
+.header{height:78px;background:linear-gradient(90deg,#244b7c,#1e4677);
+color:#fff;border-radius:8px;padding:10px;text-align:center}
+.header h1{margin:0;font-size:27px}.header p{margin:5px 0;font-size:16px;font-weight:600}
+.layout{display:grid;grid-template-columns:430px 1fr 410px;gap:18px;margin-top:14px;align-items:start}
+.panel{border:1px solid #7db4df;border-radius:8px;padding:10px;background:#fbfdff}
+.panel h2{font-size:17px;margin:0 0 8px;color:#153b68}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#eaf4ff;color:#153b68;text-align:left}
+th,td{border:1px solid #a9c6df;padding:4px;vertical-align:top}
+.note{margin-top:8px;background:#fff4cf;border:1px solid #e6bf48;border-radius:6px;padding:8px;font-size:11px}
+.status{margin-top:12px}.status h3{font-size:13px;margin:0;padding:7px;border-radius:5px 5px 0 0}
+.status ul{margin:0;padding:7px 18px;font-size:11px;line-height:1.45}
+.s1{border:1px solid #ef9b9b;background:#fff2f2}.s1 h3{background:#ffe2e2}
+.s2{border:1px solid #efc45e;background:#fffaf0}.s2 h3{background:#fff0c4}
+.s3{border:1px solid #8dd39d;background:#f1fff4}.s3 h3{background:#dcf8e2}
+.s4{border:1px solid #86b9e6;background:#f2f8ff}.s4 h3{background:#dfedff}
+.total{font-weight:bold;font-size:11px;margin-top:7px}
+.center{position:relative}
+svg{width:100%;height:auto;display:block}
+.right .box{border:1px solid #8bb8dc;border-radius:8px;margin-bottom:12px;padding:11px;background:#fff}
+.right .box h3{margin:0 0 9px;font-size:16px}
+.action{display:flex;gap:9px;margin:9px 0;font-size:12px;line-height:1.35}
+.num{min-width:23px;height:23px;border-radius:50%;background:#e45b52;color:white;font-weight:bold;
+display:flex;align-items:center;justify-content:center}
+.rules li{font-size:12px;margin:9px 0;list-style:"✓  ";padding-left:4px}
+.legend div{font-size:12px;margin:8px 0;display:flex;align-items:center;gap:8px}
+.sw{width:38px;height:17px;border:1px solid #777;border-radius:5px;display:inline-block}
+.start{background:#eee8ff;border-color:#6245d8}.process{background:#eaf4ff;border-color:#2384dc}
+.decision{background:#fff2c8;border-color:#e0a72f;transform:rotate(45deg);width:18px;height:18px}
+.block{background:#ffe6e6;border-color:#ef5350}.success{background:#e5fae9;border-color:#4cae65}
+.mail{background:#eee8ff;border-color:#745ce6}
+@media(max-width:1200px){.page{width:100%}.layout{grid-template-columns:1fr}.panel{overflow:auto}}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+<header class="header">
+  <h1>Payment Gateway Transaction Flow</h1>
+  <p>Block payment for specific window time for Pending / Processing transactions</p>
+</header>
+
+<div class="layout">
+
+<!-- LEFT -->
+<section>
+<div class="panel">
+<h2>Payment Gateway Timeout / Cancellation Reference</h2>
+<table>
+<thead><tr><th>#</th><th>Payment Gateway</th><th>Timeout / Pending Duration</th><th>Cancellation / Remarks</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Stripe</td><td>1 hour</td><td>Cancel API available</td></tr>
+<tr><td>2</td><td>Peach</td><td>30–60 minutes</td><td>Timeout duration</td></tr>
+<tr><td>3</td><td>CorvusPay</td><td>15 minutes</td><td>Timeout duration</td></tr>
+<tr><td>4</td><td>PayPal</td><td>N/A</td><td>Cancel API available</td></tr>
+<tr><td>5</td><td>GoldenPay</td><td>30 minutes</td><td>Timeout duration</td></tr>
+<tr><td>6</td><td>AltPayNet</td><td>1 hour</td><td>Timeout duration</td></tr>
+<tr><td>7</td><td>InvoiceForU</td><td>N/A</td><td>PG mentioned ~3 hours</td></tr>
+<tr><td>8</td><td>TapToPay</td><td>N/A</td><td>Can remain Pending for long time</td></tr>
+<tr><td>9</td><td>Tupaggo</td><td>N/A</td><td>Waiting for PG response</td></tr>
+<tr><td>10</td><td>ThawaniPay</td><td>30 minutes</td><td>Timeout duration</td></tr>
+<tr><td>11</td><td>Stripe Bank Transfer</td><td>24 hours</td><td>Timeout duration</td></tr>
+<tr><td>12</td><td>Paratika</td><td>7 days</td><td>Timeout duration</td></tr>
+<tr><td>13</td><td>Amazon Pay</td><td>1 hour</td><td>Timeout duration</td></tr>
+<tr><td>14</td><td>Mercado Pago Card</td><td>N/A</td><td>Cancel API; ~7 business days</td></tr>
+<tr><td>15</td><td>Mercado Pago Cash</td><td>N/A</td><td>Cancel API; ~7 business days</td></tr>
+<tr><td>16</td><td>Mercado Pago Bank</td><td>N/A</td><td>Cancel API; ~7 business days</td></tr>
+<tr><td>17</td><td>Mercado Pago PIX</td><td>N/A</td><td>Cancel API; ~7 business days</td></tr>
+<tr><td>18</td><td>NMI PG</td><td>N/A</td><td>Cancel API available</td></tr>
+<tr><td>19</td><td>WebPay REST</td><td>4–10 minutes</td><td>Timeout duration</td></tr>
+<tr><td>20</td><td>BenefitPay</td><td>Pending</td><td>Waiting for PG response</td></tr>
+<tr><td>21</td><td>Bancard</td><td>Pending</td><td>Waiting for PG response</td></tr>
+<tr><td>22</td><td>Midtrans</td><td>N/A</td><td>Cancel API available</td></tr>
+<tr><td>23</td><td>MontyPay</td><td>1 hour</td><td>Timeout duration</td></tr>
+</tbody>
+</table>
+<div class="note"><b>Default Timeout:</b> If a PG has neither a timeout duration nor a Cancel/Void API, use the default <b>7-day timeout</b>.</div>
+</div>
+
+<div class="panel status">
+<h2>PG Lists with Status</h2>
+<div class="s1"><h3>Only Pending (1)</h3><ul><li>CorvusPay</li></ul></div>
+<div class="s2"><h3>Only Processing (11)</h3><ul>
+<li>TapToPay</li><li>InvoiceForU</li><li>PayPal</li><li>GoldenPay</li><li>NMI PG</li><li>Bancard</li><li>Tupaggo</li><li>Mercado Pago Cash</li><li>Mercado Pago Bank</li><li>Mercado Pago Card</li><li>Mercado Pago PIX</li>
+</ul></div>
+<div class="s3"><h3>Both Pending &amp; Processing (9)</h3><ul>
+<li>Stripe</li><li>Peach</li><li>AltPayNet</li><li>ThawaniPay</li><li>Paratika</li><li>Amazon Pay</li><li>BenefitPay</li><li>Midtrans</li><li>MontyPay</li>
+</ul></div>
+<div class="s4"><h3>Neither Pending nor Processing (2)</h3><ul><li>WebPay REST</li><li>Stripe Bank Transfer</li></ul></div>
+<div class="total">Total Payment Gateways: 24</div>
+</div>
+</section>
+
+<!-- CENTER FLOW -->
+<section class="center">
+<svg viewBox="0 0 780 1420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Payment gateway transaction flow">
+
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#183b63"/>
+</marker>
+<style>
+.t{font-family:Arial,Helvetica,sans-serif;fill:#17365d}
+.title{font-size:15px;font-weight:bold}
+.title-sm{font-size:13px;font-weight:bold}
+.small{font-size:11px}.tiny{font-size:10px}
+.line{stroke:#183b63;stroke-width:2;fill:none;marker-end:url(#arrow)}
+.edge{stroke:#183b63;stroke-width:2;fill:none}
+.tag{font-weight:bold;fill:#b23b3b}
+.tag-y{font-weight:bold;fill:#207a3b}
+</style>
+</defs>
+
+<!-- ==================== COMMON TOP ==================== -->
+<rect x="245" y="20" width="210" height="44" rx="22" fill="#eee8ff" stroke="#6245d8" stroke-width="2"/>
+<text x="350" y="47" text-anchor="middle" class="t title">START</text>
+<path class="line" d="M350 64V96"/>
+
+<rect x="150" y="96" width="400" height="64" rx="7" fill="#eaf4ff" stroke="#2384dc" stroke-width="2"/>
+<text x="350" y="122" text-anchor="middle" class="t title">Participant Initiates Payment</text>
+<text x="350" y="143" text-anchor="middle" class="t small">(New Payment / Remaining Amount / Additional Sale)</text>
+<path class="line" d="M350 160V192"/>
+
+<rect x="125" y="192" width="450" height="64" rx="8" fill="#e7f8ea" stroke="#29934b" stroke-width="2"/>
+<text x="350" y="218" text-anchor="middle" class="t title">Check Existing Pending / Processing Transaction</text>
+<text x="350" y="239" text-anchor="middle" class="t small">(Same participant + same payment context)</text>
+<path class="line" d="M350 256V286"/>
+
+<polygon points="350,286 460,348 350,410 240,348" fill="#fff2c8" stroke="#dfa52d" stroke-width="2"/>
+<text x="350" y="336" text-anchor="middle" class="t small" font-weight="bold">Is there an open</text>
+<text x="350" y="352" text-anchor="middle" class="t small" font-weight="bold">Pending / Processing</text>
+<text x="350" y="368" text-anchor="middle" class="t small">transaction?</text>
+
+<!-- ==================== LEFT LANE : YES ==================== -->
+<path class="edge" d="M240 348H130V438"/>
+<path class="line" d="M130 438V440"/>
+<text x="196" y="338" text-anchor="middle" class="t tag">YES</text>
+
+<rect x="20" y="440" width="220" height="72" rx="7" fill="#ffe6e6" stroke="#ef5350" stroke-width="2"/>
+<text x="130" y="470" text-anchor="middle" class="t title-sm">BLOCK PAYMENT OPTION</text>
+<text x="130" y="492" text-anchor="middle" class="t small">Disable payment methods</text>
+<path class="line" d="M130 512V542"/>
+
+<rect x="20" y="542" width="220" height="104" rx="7" fill="#eee8ff" stroke="#745ce6" stroke-width="2"/>
+<text x="130" y="568" text-anchor="middle" class="t title-sm">Show Message to Participant</text>
+<text x="32" y="592" class="t tiny">"You already have a payment in</text>
+<text x="32" y="607" class="t tiny">Pending/Processing status. Are</text>
+<text x="32" y="622" class="t tiny">willing to pay again"</text>
+<path class="line" d="M130 646V690"/>
+
+<rect x="20" y="690" width="220" height="72" rx="7" fill="#eee8ff" stroke="#745ce6" stroke-width="2"/>
+<text x="130" y="718" text-anchor="middle" class="t title-sm">Send Pending Action Email</text>
+<text x="130" y="740" text-anchor="middle" class="t small">(after configured time)</text>
+
+<!-- left lane down the far left, then along the bus to END -->
+<path class="edge" d="M130 762V1280"/>
+
+<!-- ==================== RIGHT LANE : NO ==================== -->
+<path class="edge" d="M460 348H530V438"/>
+<path class="line" d="M530 438V440"/>
+<text x="500" y="338" text-anchor="middle" class="t tag-y">NO</text>
+
+<rect x="420" y="440" width="220" height="100" rx="7" fill="#eaf4ff" stroke="#2384dc" stroke-width="2"/>
+<text x="530" y="466" text-anchor="middle" class="t title-sm">Determine Payment Type</text>
+<text x="436" y="490" class="t tiny">• Full Amount</text>
+<text x="436" y="507" class="t tiny">• Remaining Amount</text>
+<text x="436" y="524" class="t tiny">• Additional Sale</text>
+<path class="line" d="M530 540V568"/>
+
+<rect x="420" y="568" width="220" height="78" rx="7" fill="#eee8ff" stroke="#745ce6" stroke-width="2"/>
+<text x="530" y="596" text-anchor="middle" class="t title-sm">Validate Payment Order</text>
+<text x="530" y="618" text-anchor="middle" class="t small">(order, amount, status)</text>
+<path class="line" d="M530 646V676"/>
+
+<polygon points="530,676 630,736 530,796 430,736" fill="#fff2c8" stroke="#dfa52d" stroke-width="2"/>
+<text x="530" y="730" text-anchor="middle" class="t tiny" font-weight="bold">Eligible for Payment?</text>
+<text x="530" y="746" text-anchor="middle" class="t tiny">(course last date / rules)</text>
+
+<!-- ineligible branch to the right -->
+<path class="edge" d="M630 736H700V864"/>
+<path class="line" d="M700 864V866"/>
+<text x="672" y="726" text-anchor="middle" class="t tag">NO</text>
+<rect x="650" y="866" width="100" height="60" rx="7" fill="#ffe6e6" stroke="#ef5350" stroke-width="2"/>
+<text x="700" y="892" text-anchor="middle" class="t title-sm">BLOCK</text>
+<text x="700" y="911" text-anchor="middle" class="t tiny">Show message</text>
+
+<!-- eligible continuation -->
+<path class="line" d="M530 796V830"/>
+<text x="548" y="818" text-anchor="middle" class="t tag-y">YES</text>
+<rect x="420" y="830" width="220" height="62" rx="7" fill="#eaf4ff" stroke="#2384dc" stroke-width="2"/>
+<text x="530" y="856" text-anchor="middle" class="t title-sm">Initiate Payment with PG</text>
+<text x="530" y="877" text-anchor="middle" class="t small">(Use Rescue Service for all PGs)</text>
+<path class="line" d="M530 892V920"/>
+
+<rect x="420" y="920" width="220" height="62" rx="7" fill="#e7f8ea" stroke="#29934b" stroke-width="2"/>
+<text x="530" y="946" text-anchor="middle" class="t title-sm">Monitor Transaction</text>
+<text x="530" y="967" text-anchor="middle" class="t tiny">PG timeout / Cancel API / 7-day default</text>
+<path class="line" d="M530 982V1012"/>
+
+<polygon points="530,1012 630,1068 530,1124 430,1068" fill="#fff2c8" stroke="#dfa52d" stroke-width="2"/>
+<text x="530" y="1062" text-anchor="middle" class="t tiny" font-weight="bold">Transaction</text>
+<text x="530" y="1078" text-anchor="middle" class="t tiny" font-weight="bold">Status?</text>
+
+<!-- ==================== OUTCOMES ==================== -->
+<!-- SUCCESS -> left outcome -->
+<path class="edge" d="M430 1068H300V1168"/>
+<path class="line" d="M300 1168V1170"/>
+<text x="362" y="1058" text-anchor="middle" class="t tag-y">SUCCESS</text>
+<rect x="210" y="1170" width="180" height="70" rx="7" fill="#e5fae9" stroke="#4cae65" stroke-width="2"/>
+<text x="300" y="1198" text-anchor="middle" class="t title-sm">Update Records</text>
+<text x="300" y="1218" text-anchor="middle" class="t tiny">Success / balance / notify</text>
+
+<!-- PENDING -> center outcome -->
+<path class="line" d="M530 1124V1170"/>
+<text x="560" y="1152" text-anchor="middle" class="t tiny" font-weight="bold">PENDING</text>
+<rect x="445" y="1170" width="170" height="70" rx="7" fill="#fff4cf" stroke="#dfa52d" stroke-width="2"/>
+<text x="530" y="1198" text-anchor="middle" class="t title-sm">Pending / Processing</text>
+<text x="530" y="1218" text-anchor="middle" class="t tiny">Keep blocked + email</text>
+
+<!-- FAIL -> right outcome -->
+<path class="edge" d="M630 1068H700V1168"/>
+<path class="line" d="M700 1168V1170"/>
+<text x="666" y="1058" text-anchor="middle" class="t tag">FAILED</text>
+<rect x="640" y="1170" width="120" height="70" rx="7" fill="#ffe6e6" stroke="#ef5350" stroke-width="2"/>
+<text x="700" y="1198" text-anchor="middle" class="t title-sm">FAIL</text>
+<text x="700" y="1218" text-anchor="middle" class="t tiny">Retry</text>
+
+<!-- ==================== MERGE BUS -> END ==================== -->
+<path class="edge" d="M300 1240V1280"/>
+<path class="edge" d="M530 1240V1280"/>
+<path class="edge" d="M700 1240V1280"/>
+<path class="edge" d="M130 1280H700"/>
+<path class="line" d="M350 1280V1302"/>
+
+<rect x="280" y="1305" width="140" height="40" rx="20" fill="#eee8ff" stroke="#6245d8" stroke-width="2"/>
+<text x="350" y="1331" text-anchor="middle" class="t title">END</text>
+
+</svg>
+</section>
+
+<!-- RIGHT -->
+<section class="right">
+<div class="box">
+<h3>Special Scenarios &amp; MOM Actions</h3>
+<div class="action"><span class="num">1</span><div><b>Deposit Payment</b><br>If deposit is paid and remaining amount is pending, define an internal solution.</div></div>
+<div class="action"><span class="num">2</span><div><b>Lead Registration</b><br>Check whether Pending Action Mail is sent after a configured time.</div></div>
+<div class="action"><span class="num">3</span><div><b>Rescue Service (CAPS)</b><br>Implement for all Payment Gateways.</div></div>
+<div class="action"><span class="num">4</span><div><b>Merchant Practices</b><br>Check how other merchants handle pending transactions.</div></div>
+<div class="action"><span class="num">5</span><div><b>Pending Action Email</b><br>Send email when there is an open pending transaction.</div></div>
+<div class="action"><span class="num">6</span><div><b>Add Offline Payment</b><br>Show message when a pending/processing online transaction exists, and vice versa.</div></div>
+<div class="action"><span class="num">7</span><div><b>Validate Payment Order</b><br>Validate order before confirming transactions.</div></div>
+</div>
+
+<div class="box rules">
+<h3>Key Rules / Decision Points</h3>
+<ul>
+<li>Use PG-specific timeout duration or Cancel API.</li>
+<li>If neither exists, use 7-day default timeout.</li>
+<li>Block payment when an open Pending / Processing transaction exists.</li>
+<li>Handle deposit, remaining amount and additional sale flows.</li>
+<li>Send Pending Action Email for configured cases.</li>
+<li>Use Rescue Service for all PGs.</li>
+<li>Validate payment order before confirming transaction.</li>
+</ul>
+</div>
+
+<div class="box legend">
+<h3>Legend</h3>
+<div><span class="sw start"></span> Start / End</div>
+<div><span class="sw process"></span> Process / Action</div>
+<div><span class="sw decision"></span> Decision</div>
+<div><span class="sw block"></span> Block / Error</div>
+<div><span class="sw success"></span> Success / Update</div>
+<div><span class="sw mail"></span> Notification / Email</div>
+<div>➜ Flow Direction</div>
+</div>
+</section>
+
+</div>
+</div>
+</body>
+</html>
