@@ -1,0 +1,287 @@
+/* ==========================================================================
+   Payment Gateway Transaction Flow — stylesheet
+   Plain CSS only. No frameworks, no external dependencies.
+   Desktop layout is preserved exactly; media queries below make the page
+   responsive on narrower screens.
+   ========================================================================== */
+
+/* ---------- Base / reset ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f7fafc;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #17365d;
+}
+
+/* Fixed desktop canvas, centred; scales to full width on small screens. */
+.page {
+  width: 1600px;
+  margin: 18px auto;
+  background: #fff;
+  padding: 0 18px 18px;
+}
+
+/* ---------- Header ---------- */
+.header {
+  height: 78px;
+  background: linear-gradient(90deg, #244b7c, #1e4677);
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 27px;
+}
+
+.header p {
+  margin: 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ---------- Three-column layout ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: 430px 1fr 410px;
+  gap: 18px;
+  margin-top: 14px;
+  align-items: start;
+}
+
+/* ---------- Panels (left column) ---------- */
+.panel {
+  border: 1px solid #7db4df;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fbfdff;
+}
+
+.panel h2 {
+  font-size: 17px;
+  margin: 0 0 8px;
+  color: #153b68;
+}
+
+/* ---------- Reference table ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+th {
+  background: #eaf4ff;
+  color: #153b68;
+  text-align: left;
+}
+
+th,
+td {
+  border: 1px solid #a9c6df;
+  padding: 4px;
+  vertical-align: top;
+}
+
+/* Callout note under the table */
+.note {
+  margin-top: 8px;
+  background: #fff4cf;
+  border: 1px solid #e6bf48;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+}
+
+/* ---------- Status list (left column) ---------- */
+.status {
+  margin-top: 12px;
+}
+
+.status h3 {
+  font-size: 13px;
+  margin: 0;
+  padding: 7px;
+  border-radius: 5px 5px 0 0;
+}
+
+.status ul {
+  margin: 0;
+  padding: 7px 18px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* Status colour themes */
+.s1 {
+  border: 1px solid #ef9b9b;
+  background: #fff2f2;
+}
+.s1 h3 {
+  background: #ffe2e2;
+}
+
+.s2 {
+  border: 1px solid #efc45e;
+  background: #fffaf0;
+}
+.s2 h3 {
+  background: #fff0c4;
+}
+
+.s3 {
+  border: 1px solid #8dd39d;
+  background: #f1fff4;
+}
+.s3 h3 {
+  background: #dcf8e2;
+}
+
+.s4 {
+  border: 1px solid #86b9e6;
+  background: #f2f8ff;
+}
+.s4 h3 {
+  background: #dfedff;
+}
+
+.total {
+  font-weight: bold;
+  font-size: 11px;
+  margin-top: 7px;
+}
+
+/* ---------- Center flowchart ---------- */
+.center {
+  position: relative;
+}
+
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---------- Right column boxes ---------- */
+.right .box {
+  border: 1px solid #8bb8dc;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 11px;
+  background: #fff;
+}
+
+.right .box h3 {
+  margin: 0 0 9px;
+  font-size: 16px;
+}
+
+/* Numbered MOM actions */
+.action {
+  display: flex;
+  gap: 9px;
+  margin: 9px 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.num {
+  min-width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #e45b52;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Key rules list */
+.rules li {
+  font-size: 12px;
+  margin: 9px 0;
+  list-style: "✓  ";
+  padding-left: 4px;
+}
+
+/* Legend swatches */
+.legend div {
+  font-size: 12px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sw {
+  width: 38px;
+  height: 17px;
+  border: 1px solid #777;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.legend .start {
+  background: #eee8ff;
+  border-color: #6245d8;
+}
+.legend .process {
+  background: #eaf4ff;
+  border-color: #2384dc;
+}
+.legend .decision {
+  background: #fff2c8;
+  border-color: #e0a72f;
+  transform: rotate(45deg);
+  width: 18px;
+  height: 18px;
+}
+.legend .block {
+  background: #ffe6e6;
+  border-color: #ef5350;
+}
+.legend .success {
+  background: #e5fae9;
+  border-color: #4cae65;
+}
+.legend .mail {
+  background: #eee8ff;
+  border-color: #745ce6;
+}
+
+/* ---------- Responsive ---------- */
+/* Stack the three columns and let the SVG scale fluidly. */
+@media (max-width: 1200px) {
+  .page {
+    width: 100%;
+  }
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .panel {
+    overflow: auto;
+  }
+}
+
+/* Small screens: trim header type and page gutters without changing layout. */
+@media (max-width: 600px) {
+  .page {
+    padding: 0 10px 10px;
+  }
+  .header {
+    height: auto;
+  }
+  .header h1 {
+    font-size: 20px;
+  }
+  .header p {
+    font-size: 13px;
+  }
+}
