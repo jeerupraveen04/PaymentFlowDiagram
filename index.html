@@ -125,14 +125,16 @@
 
         <rect x="20" y="440" width="220" height="72" rx="7" fill="#ffe6e6" stroke="#ef5350" stroke-width="2"/>
         <text x="130" y="470" text-anchor="middle" class="t title-sm">BLOCK PAYMENT OPTION</text>
-        <text x="130" y="492" text-anchor="middle" class="t small">Disable payment methods</text>
+        <foreignObject x="30" y="476" width="200" height="32">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="flow-note flow-note-md">BLOCK PAYMENT OPTION FOR 30 MINUTES</div>
+        </foreignObject>
         <path class="line" d="M130 512V542"/>
 
-        <rect x="20" y="542" width="220" height="104" rx="7" fill="#eee8ff" stroke="#745ce6" stroke-width="2"/>
+        <rect x="20" y="542" width="220" height="112" rx="7" fill="#eee8ff" stroke="#745ce6" stroke-width="2"/>
         <text x="130" y="568" text-anchor="middle" class="t title-sm">Show Message to Participant</text>
-        <text x="32" y="592" class="t tiny">"You already have a payment in</text>
-        <text x="32" y="607" class="t tiny">Pending/Processing status. Are</text>
-        <text x="32" y="622" class="t tiny">willing to pay again"</text>
+        <foreignObject x="30" y="578" width="200" height="68">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="flow-note flow-note-left">"Thanks for your order! We're holding your order in Pending status for 30 minutes in case you need to make any quick edits or cancellation. After 30 minutes, our team will start preparing your items for shipment."</div>
+        </foreignObject>
 
         <!-- If the participant is willing to pay again, redirect to Determine Payment Type -->
         <path class="line" d="M240 594H390V490H420"/>
@@ -157,7 +159,7 @@
 
         <polygon points="530,676 630,736 530,796 430,736" fill="#fff2c8" stroke="#dfa52d" stroke-width="2"/>
         <text x="530" y="730" text-anchor="middle" class="t tiny" font-weight="bold">Eligible for Payment?</text>
-        <text x="530" y="746" text-anchor="middle" class="t tiny">(course last date / rules)</text>
+        <text x="530" y="740" text-anchor="middle" class="t tiny">Correct Amount,Participant Details Match .</text>
 
         <!-- Ineligible branch to the right -->
         <path class="edge" d="M630 736H700V864"/>
@@ -171,13 +173,14 @@
         <path class="line" d="M530 796V830"/>
         <text x="548" y="818" text-anchor="middle" class="t tag-y">YES</text>
         <rect x="420" y="830" width="220" height="62" rx="7" fill="#eaf4ff" stroke="#2384dc" stroke-width="2"/>
-        <text x="530" y="856" text-anchor="middle" class="t title-sm">Initiate Payment with PG</text>
-        <text x="530" y="877" text-anchor="middle" class="t small">(Use Rescue Service for all PGs)</text>
+        <text x="530" y="856" text-anchor="middle" class="t title-sm">Redirect To PG page</text>
+        <foreignObject x="430" y="862" width="200" height="28">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="flow-note">Participant, enter the card details to proceed with the payment.</div>
+        </foreignObject>
         <path class="line" d="M530 892V920"/>
 
         <rect x="420" y="920" width="220" height="62" rx="7" fill="#e7f8ea" stroke="#29934b" stroke-width="2"/>
         <text x="530" y="946" text-anchor="middle" class="t title-sm">Monitor Transaction</text>
-        <text x="530" y="967" text-anchor="middle" class="t tiny">PG timeout / Cancel API / 7-day default</text>
         <path class="line" d="M530 982V1012"/>
 
         <polygon points="530,1012 630,1068 530,1124 430,1068" fill="#fff2c8" stroke="#dfa52d" stroke-width="2"/>
@@ -264,6 +267,143 @@
     </section>
 
   </div>
+
+  <!-- ==================== RESCUE SERVICE FLOW ==================== -->
+  <section class="rescue" aria-label="Rescue service flow diagram">
+    <h2>Rescue Service Flow</h2>
+
+    <svg viewBox="0 0 1100 1590" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rescue service flow diagram: caps-cron to caps-be to rescue service workers to PG, CAPS, BX, email and user">
+
+      <defs>
+        <marker id="rs-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#183b63"/>
+        </marker>
+      </defs>
+
+      <!-- ==================== CAPS-CRON ==================== -->
+      <rect x="50" y="16" width="1000" height="124" rx="10" fill="none" stroke="#9db6cc" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text x="66" y="38" class="rs-t rs-group-label">Caps-cron</text>
+
+      <rect x="90" y="48" width="420" height="76" rx="8" fill="#e0f7f6" stroke="#12909b" stroke-width="2"/>
+      <text x="300" y="76" text-anchor="middle" class="rs-t rs-title">ProcessRetryAttempts cron</text>
+      <text x="300" y="102" text-anchor="middle" class="rs-t rs-sub">0 * * * *</text>
+
+      <rect x="590" y="48" width="420" height="76" rx="8" fill="#e0f7f6" stroke="#12909b" stroke-width="2"/>
+      <text x="800" y="76" text-anchor="middle" class="rs-t rs-title">ProcessOrphanTransactions cron</text>
+      <text x="800" y="102" text-anchor="middle" class="rs-t rs-sub">30 * * * *</text>
+
+      <path class="rs-edge" d="M300 124V170H550"/>
+      <path class="rs-edge" d="M800 124V170H550"/>
+      <path class="rs-line" d="M550 170V196"/>
+
+      <!-- ==================== CAPS-BE ==================== -->
+      <rect x="340" y="196" width="420" height="82" rx="8" fill="#eaf4ff" stroke="#2384dc" stroke-width="2"/>
+      <text x="550" y="226" text-anchor="middle" class="rs-t rs-title">Caps-BE</text>
+      <text x="550" y="252" text-anchor="middle" class="rs-t rs-sub">POST /rescue-service/:id</text>
+
+      <path class="rs-edge" d="M550 278V306H300"/>
+      <path class="rs-edge" d="M550 306H800"/>
+      <text x="410" y="300" text-anchor="middle" class="rs-t rs-tag-id">id = 1</text>
+      <text x="690" y="300" text-anchor="middle" class="rs-t rs-tag-id">id = 2</text>
+      <path class="rs-line" d="M300 306V338"/>
+      <path class="rs-line" d="M800 306V338"/>
+
+      <!-- ==================== LANE 1 : ProcessExternalAttempts ==================== -->
+      <rect x="80" y="338" width="440" height="104" rx="8" fill="#fdeaf7" stroke="#c0399b" stroke-width="2"/>
+      <text x="300" y="366" text-anchor="middle" class="rs-t rs-title">ProcessRetry Attempts</text>
+      <foreignObject x="100" y="378" width="400" height="56">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="rs-note">Handles transactions where an external / payment-service update failed or was interrupted — e.g. a network issue, or a failure while updating another service.</div>
+      </foreignObject>
+
+      <path class="rs-line" d="M300 442V486"/>
+      <rect x="80" y="486" width="440" height="76" rx="8" fill="#dfedff" stroke="#2f6fb5" stroke-width="2"/>
+      <text x="300" y="514" text-anchor="middle" class="rs-t rs-title">Update Transaction Status</text>
+      <text x="300" y="538" text-anchor="middle" class="rs-t rs-sub">In other services (with Body)</text>
+
+      <!-- ==================== LANE 2 : ProcessOrphanTransactions ==================== -->
+      <rect x="580" y="338" width="440" height="104" rx="8" fill="#fdeaf7" stroke="#c0399b" stroke-width="2"/>
+      <text x="800" y="366" text-anchor="middle" class="rs-t rs-title">ProcessOrphanTransactions</text>
+      <foreignObject x="600" y="378" width="400" height="56">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="rs-note">Finds transactions whose status is not FAILED, CANCELLED or SUCCESS.</div>
+      </foreignObject>
+
+      <path class="rs-line" d="M800 442V486"/>
+      <rect x="580" y="486" width="440" height="76" rx="8" fill="#e7f8ea" stroke="#29934b" stroke-width="2"/>
+      <text x="800" y="514" text-anchor="middle" class="rs-t rs-title">Payment Gateway (PG)</text>
+      <text x="800" y="538" text-anchor="middle" class="rs-t rs-sub">Confirm the latest transaction status</text>
+
+      <path class="rs-line" d="M800 562V598"/>
+      <rect x="580" y="598" width="440" height="76" rx="8" fill="#dfedff" stroke="#2f6fb5" stroke-width="2"/>
+      <text x="800" y="626" text-anchor="middle" class="rs-t rs-title">Update Transaction Status in CAPS</text>
+      <text x="800" y="650" text-anchor="middle" class="rs-t rs-sub">Sync the confirmed status back to CAPS</text>
+
+      <!-- ==================== RESCUE SERVICE ==================== -->
+      <path class="rs-edge" d="M300 562V706H550"/>
+      <path class="rs-edge" d="M800 674V706H550"/>
+      <path class="rs-line" d="M550 706V742"/>
+
+      <rect x="340" y="742" width="420" height="82" rx="8" fill="#fdeaf7" stroke="#c0399b" stroke-width="2"/>
+      <text x="550" y="772" text-anchor="middle" class="rs-t rs-title">ProcessExternal</text>
+      <text x="550" y="798" text-anchor="middle" class="rs-t rs-sub">Call the External service (BX)</text>
+
+      <path class="rs-line" d="M550 824V860"/>
+
+      <!-- ==================== BX ==================== -->
+      <rect x="340" y="860" width="420" height="86" rx="8" fill="#ffeede" stroke="#e07a2f" stroke-width="2"/>
+      <text x="550" y="890" text-anchor="middle" class="rs-t rs-title">BX</text>
+      <text x="550" y="914" text-anchor="middle" class="rs-t rs-sub">Checks the latest status</text>
+
+      <path class="rs-line" d="M550 946V986"/>
+
+      <!-- ==================== DECISION ==================== -->
+      <polygon points="550,986 700,1070 550,1154 400,1070" fill="#fff2c8" stroke="#dfa52d" stroke-width="2"/>
+      <text x="550" y="1064" text-anchor="middle" class="rs-t rs-title">Has the status</text>
+      <text x="550" y="1082" text-anchor="middle" class="rs-t rs-title">changed?</text>
+
+      <!-- YES -> update BX database, email, user, end -->
+      <path class="rs-line" d="M550 1154V1190"/>
+      <text x="572" y="1180" text-anchor="middle" class="rs-t rs-tag-y">YES</text>
+
+      <rect x="340" y="1190" width="420" height="76" rx="8" fill="#dfedff" stroke="#2f6fb5" stroke-width="2"/>
+      <text x="550" y="1218" text-anchor="middle" class="rs-t rs-title">Update BX Database</text>
+      <text x="550" y="1242" text-anchor="middle" class="rs-t rs-sub">Store the changed status in BX</text>
+
+      <path class="rs-line" d="M550 1266V1302"/>
+
+      <rect x="340" y="1302" width="420" height="76" rx="8" fill="#eee8ff" stroke="#745ce6" stroke-width="2"/>
+      <text x="550" y="1330" text-anchor="middle" class="rs-t rs-title">Email Service</text>
+      <text x="550" y="1354" text-anchor="middle" class="rs-t rs-sub">Sends the notification email</text>
+
+      <path class="rs-line" d="M550 1378V1414"/>
+
+      <rect x="340" y="1414" width="420" height="76" rx="8" fill="#fffbe0" stroke="#c69a12" stroke-width="2"/>
+      <text x="550" y="1442" text-anchor="middle" class="rs-t rs-title">User</text>
+      <text x="550" y="1466" text-anchor="middle" class="rs-t rs-sub">Receives the transaction status notification</text>
+
+      <path class="rs-line" d="M550 1490V1524"/>
+
+      <!-- NO -> status unchanged, straight to end -->
+      <path class="rs-line" d="M700 1070H930V1547H642"/>
+      <text x="726" y="1062" text-anchor="middle" class="rs-t rs-tag">NO</text>
+
+      <rect x="460" y="1524" width="180" height="46" rx="23" fill="#eee8ff" stroke="#6245d8" stroke-width="2"/>
+      <text x="550" y="1553" text-anchor="middle" class="rs-t rs-title">END</text>
+
+    </svg>
+
+    <div class="rs-legend">
+      <span><i class="rs-sw rs-cron"></i>Cron Job</span>
+      <span><i class="rs-sw rs-be"></i>CAPS-BE</span>
+      <span><i class="rs-sw rs-rescue"></i>Rescue Service</span>
+      <span><i class="rs-sw rs-pg"></i>Payment Gateway</span>
+      <span><i class="rs-sw rs-bx"></i>BX</span>
+      <span><i class="rs-sw rs-db"></i>Database Update</span>
+      <span><i class="rs-sw rs-email"></i>Email Service</span>
+      <span><i class="rs-sw rs-user"></i>User</span>
+      <span><i class="rs-sw rs-decision"></i>Decision</span>
+      <span><i class="rs-sw rs-end"></i>End</span>
+    </div>
+  </section>
 </div>
 </body>
 </html>

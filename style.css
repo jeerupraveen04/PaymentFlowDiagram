@@ -17,9 +17,11 @@ body {
   color: #17365d;
 }
 
-/* Fixed desktop canvas, centred; scales to full width on small screens. */
+/* Desktop canvas, centred; shrinks to fit narrower screens instead of
+   overflowing the viewport and clipping content off the right edge. */
 .page {
-  width: 1600px;
+  width: 100%;
+  max-width: 1600px;
   margin: 18px auto;
   background: #fff;
   padding: 0 18px 18px;
@@ -168,6 +170,24 @@ svg {
   display: block;
 }
 
+/* Wrapping note text inside the flowchart.
+   SVG <text> never wraps, so longer labels live in <foreignObject> and are
+   wrapped by CSS instead of spilling out over the shapes next to them. */
+.flow-note {
+  font: 9px/1.25 Arial, Helvetica, sans-serif;
+  color: #17365d;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+.flow-note-left {
+  text-align: left;
+}
+
+.flow-note-md {
+  font-size: 11px;
+}
+
 /* ---------- Right column boxes ---------- */
 .right .box {
   border: 1px solid #8bb8dc;
@@ -254,6 +274,156 @@ svg {
 .legend .mail {
   background: #eee8ff;
   border-color: #745ce6;
+}
+
+/* ---------- Rescue Service flow (second diagram, below the layout) ---------- */
+.rescue {
+  margin-top: 26px;
+  border: 1px solid #7db4df;
+  border-radius: 8px;
+  padding: 14px 18px 18px;
+  background: #fbfdff;
+}
+
+.rescue h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: #153b68;
+}
+
+.rescue svg {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Text and connectors for the rescue flowchart. The "rs-" prefix keeps these
+   rules from touching the original diagram's .t / .line / .title classes. */
+.rs-t {
+  font-family: Arial, Helvetica, sans-serif;
+  fill: #17365d;
+}
+
+.rs-title {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.rs-sub {
+  font-size: 12px;
+}
+
+.rs-group-label {
+  font-size: 13px;
+  font-weight: bold;
+  fill: #4b6076;
+}
+
+.rs-tag {
+  font-size: 12px;
+  font-weight: bold;
+  fill: #b23b3b;
+}
+
+.rs-tag-y {
+  font-size: 12px;
+  font-weight: bold;
+  fill: #207a3b;
+}
+
+.rs-tag-id {
+  font-size: 11px;
+  font-weight: bold;
+  fill: #4b6076;
+}
+
+.rs-line {
+  stroke: #183b63;
+  stroke-width: 2;
+  fill: none;
+  marker-end: url(#rs-arrow);
+}
+
+.rs-edge {
+  stroke: #183b63;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Descriptive notes wrap in HTML (SVG <text> cannot wrap). */
+.rs-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font: 11px/1.3 Arial, Helvetica, sans-serif;
+  color: #17365d;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+/* Node-type legend under the rescue diagram. */
+.rs-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 16px auto 0;
+  max-width: 1100px;
+  font-size: 12px;
+}
+
+.rs-legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.rs-sw {
+  width: 26px;
+  height: 16px;
+  border: 2px solid #777;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.rs-sw.rs-cron {
+  background: #e0f7f6;
+  border-color: #12909b;
+}
+.rs-sw.rs-be {
+  background: #eaf4ff;
+  border-color: #2384dc;
+}
+.rs-sw.rs-rescue {
+  background: #fdeaf7;
+  border-color: #c0399b;
+}
+.rs-sw.rs-pg {
+  background: #e7f8ea;
+  border-color: #29934b;
+}
+.rs-sw.rs-bx {
+  background: #ffeede;
+  border-color: #e07a2f;
+}
+.rs-sw.rs-db {
+  background: #dfedff;
+  border-color: #2f6fb5;
+}
+.rs-sw.rs-email {
+  background: #eee8ff;
+  border-color: #745ce6;
+}
+.rs-sw.rs-user {
+  background: #fffbe0;
+  border-color: #c69a12;
+}
+.rs-sw.rs-decision {
+  background: #fff2c8;
+  border-color: #dfa52d;
+}
+.rs-sw.rs-end {
+  background: #eee8ff;
+  border-color: #6245d8;
 }
 
 /* ---------- Responsive ---------- */
