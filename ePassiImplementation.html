@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ePassi Payment Gateway — Implementation Documentation</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --line:#e2e8f0; --brand:#0ea5e9; --brand2:#6366f1; --ok:#16a34a;
+    --warn:#d97706; --err:#dc2626; --code:#f1f5f9; --codeink:#0f172a;
+    --accent:#f8fafc;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--accent);line-height:1.6;font-size:16px}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px 80px}
+  header.hero{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;padding:48px 20px 40px;margin-bottom:32px;
+       box-shadow:0 10px 30px rgba(2,6,23,.15)}
+  header.hero .inner{max-width:1100px;margin:0 auto;padding:0 20px}
+  header.hero h1{margin:0 0 8px;font-size:30px;letter-spacing:-.3px}
+  header.hero p{margin:4px 0;opacity:.95;font-size:15px}
+  .badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+  .badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+         padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:600}
+  h2{font-size:23px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand)}
+  h3{font-size:18px;margin:28px 0 10px;color:#0f172a}
+  h4{font-size:15.5px;margin:20px 0 8px;color:#334155}
+  p,li{color:#334155}
+  code{background:var(--code);color:var(--codeink);padding:2px 6px;border-radius:5px;
+       font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13.5px}
+  pre{background:var(--bg);color:#e2e8f0;padding:16px 18px;border-radius:10px;overflow:auto;
+      font-size:13px;line-height:1.55;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  pre code{background:none;color:inherit;padding:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:16px 0;
+        box-shadow:0 1px 3px rgba(2,6,23,.05)}
+  .note{border-left:5px solid var(--brand);background:#eff6ff}
+  .gap{border-left:5px solid var(--err);background:#fef2f2}
+  .okn{border-left:5px solid var(--ok);background:#f0fdf4}
+  .warnn{border-left:5px solid var(--warn);background:#fffbeb}
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;background:#fff;
+        border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(2,6,23,.06)}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:#f1f5f9;font-weight:700;color:#0f172a}
+  tr:nth-child(even) td{background:#fafcff}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 24px;
+       box-shadow:0 1px 3px rgba(2,6,23,.05)}
+  .toc ol{margin:8px 0 0;padding-left:22px}
+  .toc a{color:var(--brand2);text-decoration:none;font-weight:600}
+  .toc a:hover{text-decoration:underline}
+  .diagram{background:#0b1220;border-radius:14px;padding:22px;overflow:auto;margin:18px 0;
+           box-shadow:0 8px 24px rgba(2,6,23,.18)}
+  .diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 0;font-size:13px;color:#475569}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
+  .pill.p1{background:#6366f1}.pill.p0{background:#dc2626}.pill.p6{background:#16a34a}.pill.p4{background:#64748b}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .mini h4{margin:0 0 6px;font-size:14px}
+  .mini code{font-size:12.5px}
+  footer{color:var(--muted);font-size:13px;text-align:center;margin-top:56px;padding-top:18px;border-top:1px solid var(--line)}
+  .kw{color:#7dd3fc}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="inner">
+    <h1>ePassi Payment Gateway — Implementation Documentation</h1>
+    <p>End-to-end technical reference for the <strong>ePassi Payment Button v2</strong> integration.</p>
+    <p>Repositories: <code style="background:rgba(255,255,255,.2);color:#fff">caps-be</code> ·
+       <code style="background:rgba(255,255,255,.2);color:#fff">caps-ui</code> ·
+       <code style="background:rgba(255,255,255,.2);color:#fff">RX</code></p>
+    <div class="badges">
+      <span class="badge">Hosted form-POST gateway</span>
+      <span class="badge">SHA-512 MAC</span>
+      <span class="badge">EUR only</span>
+      <span class="badge">Full refund only</span>
+      <span class="badge">Redirect + Webhook + Verify</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#s0">Executive summary</a></li>
+    <li><a href="#s1">Order Creation</a></li>
+    <li><a href="#s2">Payment Initiation</a></li>
+    <li><a href="#s3">Transaction Status Handling</a></li>
+    <li><a href="#s4">Webhook Implementation</a></li>
+    <li><a href="#s5">Redirect Flow</a></li>
+    <li><a href="#s6">Transaction Lifecycle</a></li>
+    <li><a href="#s7">Error Handling &amp; Edge Cases</a></li>
+    <li><a href="#s8">API &amp; Code References</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s0">0 · Executive summary</h2>
+<p>ePassi is implemented as a <strong>redirect / hosted-form-post</strong> gateway. The lifecycle is:</p>
+<ol>
+  <li><strong>RX</strong> renders the CAPS pay element from the <code>caps-ui</code> package; the user clicks Pay.</li>
+  <li><strong>caps-ui</strong> (<code>EpassiElement</code>) calls <strong>caps-be</strong> <code>POST /create-order</code>.</li>
+  <li><strong>caps-be</strong> (<code>createEpassi</code>) mints a UUID <strong>STAMP</strong>, inserts a <code>caps.pg_transactions</code> row at status <code>1</code> (<em>signature_created</em>), builds and SHA-512-signs an <code>EpassiForm</code>.</li>
+  <li><strong>caps-ui</strong> receives the signed form and <strong>auto-submits it</strong> to the ePassi Payment Button.</li>
+  <li>The user pays on ePassi.</li>
+  <li>ePassi notifies CAPS-BE on <strong>two independent paths</strong>: the browser <strong>RETURN redirect</strong> (<code>STAMP/PAID/MAC</code>) and a server-to-server <strong>webhook</strong> to <code>NOTIFY_URL</code>.</li>
+  <li>RX polls <code>GET /check-status/:id</code>, which calls ePassi's <strong>verification API</strong> (<code>/api/e2/passports/exist</code>).</li>
+  <li>CAPS-BE pushes final status to RX / external endpoints via <code>processExternal</code>.</li>
+</ol>
+
+<div class="card note">
+  <strong>Reliability model.</strong> The integration is deliberately <em>idempotent and multi-path</em>: the redirect, the webhook and the verification check can all finalise the same transaction, and any transaction already in a final state is ignored (<code>internal_cycle_closed</code>).
+</div>
+
+<div class="card gap">
+  <strong>Environment note — ePassi is not seeded locally.</strong>
+  The local database snapshot contains <strong>zero</strong> ePassi rows in <code>caps.payment_gateways</code>, <code>caps.pg_type</code> and <code>caps.pg_status</code> (verified: 0 rows each). The <code>supabase/…_data.sql</code> seed lists 18 gateways but not ePassi. All code and status constants exist; a deploy requires an operator to insert the gateway, <code>pg_type</code> and matching <code>pg_status</code> rows. See §7.2.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s1">1 · Order Creation</h2>
+
+<h3>1.1 caps-ui → caps-be</h3>
+<p><code>caps-ui/src/components/PayElement/Type/Epassi/EpassiElement.tsx</code> — handler runs on pay-button click:</p>
+<pre><code>const externalOrder: ExternalOrder = {
+  pgId: gateway.pgId,
+  eid: gateway.entityId,
+  amount: order.amount,
+  currency: order.currency,
+  description: order.description,
+  metadata: order.metadata,
+  customer: order.customerInfo,
+  locale,
+  returnUrl: order.returnUrl,
+  pgMetadata: order.pgMetadata,
+  paymentMethod: epassiPaymentType.get("0"),   // → "Epassi"
+};
+
+const orderResponse = await customFetch(environment, "/create-order", "POST", externalOrder);
+if (!orderResponse.ok) { const { error } = await orderResponse.json(); throw new Error(error); }
+const orderData = await orderResponse.json();
+setFormData(orderData.data);        // ← the signed ePassi form</code></pre>
+<ul>
+  <li><code>epassiPaymentType</code> = <code>new Map([["0","Epassi"]])</code> (<code>paymentType.ts:132</code>).</li>
+  <li>A <code>prePaymentCheck</code> callback runs first; failure throws <code>PRE_PAYMENT_CHECK_FAILED</code>.</li>
+  <li>The response's <code>data</code> is the <code>EpassiForm</code>, later rendered as a hidden auto-submitting form.</li>
+</ul>
+
+<h3>1.2 Routing in caps-be</h3>
+<p><code>POST /create-order</code> (<code>caps-be/src/routes/create-order.ts</code>):</p>
+<ol>
+  <li><code>processOrder(body)</code> → vendor: <code>case "epassi": vendor = new VendorEpassi(vendorConfig, order.currency)</code> (<code>processOrder.ts:203-204</code>).</li>
+  <li><code>vendor.create(order, req)</code> → <code>createEpassi(config, order)</code>.</li>
+  <li>Responds <code>{ data: data.response }</code> = <code>{ data: EpassiForm }</code>.</li>
+  <li>Then <code>processExternal(entity, status, transaction)</code> pushes the <em>created</em> event to RX (fire-and-forget, <code>processFailure</code> fallback).</li>
+</ol>
+
+<h3>1.3 createEpassi</h3>
+<pre><code>const capsTransactionId = crypto.randomUUID();                 // ← STAMP
+const amount = convertToHuman(order.amount, order.currency).toFixed(2);
+const returnUrl = getCapsRedirectUrl(capsTransactionId, config.id, "epassi");
+
+const formData: EpassiForm = {
+  STAMP: capsTransactionId,
+  SITE: config.username,
+  AMOUNT: amount,
+  REJECT: returnUrl,
+  CANCEL: returnUrl,       // ← identical to RETURN
+  RETURN: returnUrl,
+  MAC: "",
+  NOTIFY_URL: getEpassiWebhookUrl(config),
+};
+formData.MAC = generateEpassiMac(config, formData.STAMP, formData.SITE, formData.AMOUNT);</code></pre>
+<div class="grid">
+  <div class="mini"><h4>Create MAC</h4><code>SHA512(STAMP &amp; SITE &amp; AMOUNT &amp; MAC_KEY)</code></div>
+  <div class="mini"><h4>SITE</h4><code>config.username</code></div>
+  <div class="mini"><h4>MAC key</h4><code>config.password</code></div>
+  <div class="mini"><h4>RETURN URL</h4><code>${API_URL}/redirect/epassi?caps_transaction_id=&lt;STAMP&gt;&amp;pg_id=&lt;pgId&gt;</code></div>
+  <div class="mini"><h4>Webhook URL</h4><code>${API_URL}/webhooks/${config.id}</code></div>
+</div>
+
+<h3>1.4 Persistence — <code>caps.pg_transactions</code></h3>
+<table>
+  <tr><th>Column</th><th>Value</th></tr>
+  <tr><td><code>id</code></td><td><code>capsTransactionId</code> (the UUID = STAMP)</td></tr>
+  <tr><td><code>paymentId</code></td><td><code>capsTransactionId</code></td></tr>
+  <tr><td><code>visibleId</code></td><td><code>capsTransactionId</code> provisional → overwritten with <code>PAID</code> on success</td></tr>
+  <tr><td><code>pgId</code></td><td><code>config.id</code></td></tr>
+  <tr><td><code>status</code></td><td><code>epassi_signature_created</code> = <strong>1</strong></td></tr>
+  <tr><td><code>settlement/presentment Currency</code></td><td><code>order.currency</code></td></tr>
+  <tr><td><code>…Net/TotalAmount</code></td><td><code>String(order.amount)</code></td></tr>
+  <tr><td><code>settlementFeeAmount</code></td><td><code>"0"</code></td></tr>
+  <tr><td><code>entity</code></td><td><code>order.eid</code></td></tr>
+  <tr><td><code>description/metadata/pgMetadata/method/returnUrl</code></td><td>from the order</td></tr>
+</table>
+<p>Insert failure → logged <code>Epassi DB insert error</code> → <code>SERVICE_UNAVAILABLE</code> (<code>transaction_creation_error</code>). Audit event <code>Epassi payment created</code> is emitted.</p>
+
+<!-- ============================================================ -->
+<h2 id="s2">2 · Payment Initiation</h2>
+<p>ePassi is <strong>not</strong> reached by a server redirect; the storefront <strong>auto-POSTs a hidden HTML form</strong>.</p>
+<pre><code>export const EpassiPaymentForm = ({ formData, siteUrl }) => {
+  const formElement = useRef(null);
+  useEffect(() => { formElement.current?.submit(); }, []);
+  return (
+    &lt;form action={siteUrl} method="post" ref={(x) =&gt; (formElement.current = x)}&gt;
+      {Object.entries(formData).map(([name, value]) =&gt;
+        value == null ? null : &lt;input key={name} type="hidden" name={name} value={String(value)} /&gt;
+      )}
+    &lt;/form&gt;
+  );
+};</code></pre>
+<p><code>EpassiElement.tsx</code> mounts it with <code>siteUrl = gateway.test ? getEpassiTestApiUrl() : getEpassiProdApiUrl()</code>.</p>
+<table>
+  <tr><th>Environment</th><th>Payment Button URL (browser POST)</th></tr>
+  <tr><td>Test</td><td><code>https://integration-testing.epassi.fi/e_payments/v2</code></td></tr>
+  <tr><td>Prod</td><td><code>https://services.epassi.fi/e_payments/v2</code></td></tr>
+</table>
+<div class="card warnn">
+  The same URLs exist server-side as <code>getEpassiPaymentButtonUrlTest/Prod</code>, but the <strong>form POST target is only ever used client-side</strong>. The ePassi origin must therefore be reachable from the <strong>user's browser</strong>, not just the server.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s3">3 · Transaction Status Handling</h2>
+<h3>3.1 Status constants (<code>paymentStatus.ts:126-132</code>)</h3>
+<table>
+  <tr><th>Key</th><th>Value</th><th>Meaning</th><th>Used?</th></tr>
+  <tr><td><code>epassi_failed</code></td><td><span class="pill p0">0</span></td><td>error / rejection / orphan</td><td>✅</td></tr>
+  <tr><td><code>epassi_signature_created</code></td><td><span class="pill p1">1</span></td><td>form signed, awaiting payment</td><td>✅</td></tr>
+  <tr><td><code>epassi_pending</code></td><td>3</td><td>—</td><td>❌ dead constant</td></tr>
+  <tr><td><code>epassi_canceled</code></td><td><span class="pill p4">4</span></td><td>cancel API success</td><td>✅ (cancel API only)</td></tr>
+  <tr><td><code>epassi_processing</code></td><td>5</td><td>—</td><td>❌ dead constant</td></tr>
+  <tr><td><code>epassi_successful</code></td><td><span class="pill p6">6</span></td><td>payment confirmed</td><td>✅</td></tr>
+  <tr><td><code>epassi_refund_successful</code></td><td><span class="pill p6">6</span></td><td>refund row (same value)</td><td>✅</td></tr>
+</table>
+<p><code>istatus</code> normalises numbers → strings: <code>0→failed</code>, <code>1→created</code>, <code>4→canceled</code>, <code>6→succeeded</code>. <code>isEpassiFinalStatus</code> = <code>{0,4,6}</code>.</p>
+
+<h3>3.2 Status-check API</h3>
+<p><code>GET /check-status/:id</code> → <code>processStatusRequest</code> builds <code>new VendorEpassi(vendorConfig)</code> → <code>checkStatusEpassi</code>:</p>
+<ol>
+  <li><strong>Credential guard</strong> → <code>INTERNAL_SERVER_ERROR</code> if username/password missing.</li>
+  <li><strong>Short-circuit</strong> if final status <em>or</em> no <code>visibleId</code>:
+      <ul>
+        <li><code>terminateStaleTransactions &amp;&amp; !visibleId &amp;&amp; status===1</code> → fail with <code>"Orphan Transaction"</code>;</li>
+        <li>otherwise return current local status (nothing to verify without <code>PAID</code>).</li>
+      </ul></li>
+  <li><strong>Verification API</strong> <code>verifyEpassiPayment</code>:
+      <code>api_password = SHA512(PAID &amp; MAC_KEY &amp; SITE_LOGIN)</code>;
+      <code>GET …/api/e2/passports/exist?api_login=&lt;SITE&gt;&amp;api_password=&lt;hash&gt;&amp;id=&lt;PAID&gt;&amp;site_login=&lt;SITE&gt;</code>.
+      Returns <code>true</code>/<code>false</code>, or <code>"unknown"</code> on network error / non-OK.</li>
+  <li><strong>Decision:</strong> <code>"unknown"</code> → local status; stale+not-found → <code>failed</code>; found → <code>epassi_successful (6)</code>; else local status.</li>
+</ol>
+<div class="card note">
+  In the route the call is <code>vendor.status(trxnData, false, terminateStaleTransactions)</code> — <code>updateInternalTable=false</code>, so this path computes status without persisting (<code>transaction: null</code>). Persistence happens via redirect/webhook/orphan.
+</div>
+
+<h3>3.3 Status in RX</h3>
+<p>RX has <strong>no ePassi-specific code</strong>. <code>confirm-payment.tsx</code> calls <code>checkStatus()</code> from <code>caps-ui</code>, which does <code>GET /check-status/:id</code>. Because CAPS normalises numbers through <code>istatus</code>, RX compares generic strings against <code>rx/src/constants/PaymentStatus</code> (<code>created/succeeded/failed/canceled</code>) and needs no ePassi awareness. RX consumes the packaged UI via <code>"caps-ui": "file:caps-ui-2.3.1.tgz"</code>.</p>
+
+<!-- ============================================================ -->
+<h2 id="s4">4 · Webhook Implementation</h2>
+<p><strong>Endpoint:</strong> <code>POST /webhooks/:id</code> (<code>routes/notify.ts</code>; mounted at <code>/webhooks</code> in <code>routes/index.ts</code>). <code>:id</code> = <code>config.id</code>, exactly the id embedded in <code>NOTIFY_URL</code>.</p>
+<pre><code>POST /webhooks/:id  { STAMP, PAID, MAC, errors? }</code></pre>
+<h3>4.1 Validation pipeline (<code>update.ts</code>)</h3>
+<table>
+  <tr><th>#</th><th>Step</th><th>Result on failure</th></tr>
+  <tr><td>1</td><td>Parse body as <code>EpassiWebhookNotification</code></td><td>—</td></tr>
+  <tr><td>2</td><td><code>notification.errors</code> present</td><td><code>400 webhook_error</code></td></tr>
+  <tr><td>3</td><td>STAMP + PAID + MAC all present</td><td><code>400 webhook_error</code></td></tr>
+  <tr><td>4</td><td>MAC = <code>SHA512(STAMP &amp; PAID &amp; MAC_KEY)</code>, <code>timingSafeEqual</code></td><td><code>401 signature_issue</code></td></tr>
+  <tr><td>5</td><td><code>fetchTransaction(stamp, config.id)</code> — STAMP <em>is</em> the CAPS UUID</td><td>error path</td></tr>
+  <tr><td>6</td><td><strong>Idempotency:</strong> already final → ignore</td><td><code>200 internal_cycle_closed</code></td></tr>
+  <tr><td>7</td><td>Update → <code>status=6</code>, <code>visibleId=paid</code>, <code>failureMessage=null</code></td><td>—</td></tr>
+  <tr><td>8</td><td>Audit <code>Epassi payment status updated</code>; respond <code>200 {data:"ok"}</code>; then <code>processExternal</code></td><td>—</td></tr>
+</table>
+<div class="card warnn">
+  <strong>Nuance:</strong> step 6 returns an <em>error string</em> with HTTP <code>OK</code>. In <code>notify.ts</code> there is no <code>data</code>, so the route replies <code>200 {error:"internal_cycle_closed"}</code> and <strong>skips <code>processExternal</code></strong>. ePassi treats 200 as acknowledged.
+</div>
+
+<h3>4.2 Idempotency &amp; duplicate events</h3>
+<ul>
+  <li>Duplicate deliveries are safe: the final-status guard short-circuits the second one.</li>
+  <li>The webhook cannot un-finalise a transaction the redirect already finalised (and vice-versa) — both use the same guard.</li>
+  <li>There is <strong>no</strong> separate event-id dedupe store; the transaction status <em>is</em> the dedupe key.</li>
+</ul>
+<p>The webhook and the redirect are <strong>ordering-independent</strong>: both verify the MAC and both set <code>visibleId = PAID</code>; whichever arrives first finalises, the other is ignored.</p>
+
+<!-- ============================================================ -->
+<h2 id="s5">5 · Redirect Flow</h2>
+<h3>5.1 Route (<code>routes/redirect.ts</code> — <code>ALL /redirect/:pgType?</code>)</h3>
+<p>For POST, ePassi <strong>merges query + body</strong> so <code>PAID</code> (body) survives alongside <code>caps_transaction_id</code>/<code>pg_id</code> (query):</p>
+<pre><code>if (pgType === "epassi") {
+  params = { ...(req.query as QueryParams), ...(req.parsedBody as QueryParams) };
+}</code></pre>
+<p>After the processor returns, it appends <code>caps_transaction_id=&lt;id&gt;</code> to the merchant <code>returnUrl</code>, sets the <code>Location</code> header, persists the merged params into <code>pg_transactions.redirectRequest</code>, and emits an audit event.</p>
+<div class="card warnn">The redirect route does <strong>not</strong> call <code>processExternal</code> — RX learns of the final status via the webhook or its own status poll.</div>
+
+<h3>5.2 ePassi branch (<code>processRedirect.ts</code>)</h3>
+<pre><code>} else if (pgType === "epassi") {
+  const paid  = firstParam(queryParams["PAID"]);
+  const stamp = firstParam(queryParams["STAMP"]);
+  const mac   = firstParam(queryParams["MAC"]);
+  const error = firstParam(queryParams["error"]);
+
+  if (paid &amp;&amp; stamp &amp;&amp; mac) {
+    const config = await getEpassiConfig(trxnData[0].id);
+    if (config &amp;&amp; verifyEpassiMac(config, mac, stamp, paid)) {
+      // → status = epassi_successful (6), visibleId = PAID
+    } else {
+      // log "Epassi MAC verification failed" — NO status change
+    }
+  } else if (error) {
+    // → status = epassi_failed (0), failureMessage = String(error)
+  }
+}</code></pre>
+<table>
+  <tr><th>Scenario</th><th>Params</th><th>Action</th></tr>
+  <tr><td><strong>Success</strong></td><td>PAID+STAMP+MAC, valid</td><td><code>epassi_successful (6)</code>, <code>visibleId=PAID</code></td></tr>
+  <tr><td>Success, bad MAC</td><td>PAID+STAMP+MAC, invalid</td><td>Log only, <strong>no change</strong></td></tr>
+  <tr><td><strong>Reject / cancel</strong></td><td><code>error</code> (+STAMP)</td><td><code>epassi_failed (0)</code>, <code>failureMessage=error</code></td></tr>
+  <tr><td>Neither</td><td>—</td><td>generic return-URL handling</td></tr>
+</table>
+
+<h3>5.3 Success / failure / cancellation</h3>
+<ul>
+  <li><strong>Success (RETURN):</strong> ePassi appends <code>STAMP/PAID/MAC</code> → verified → finalised → browser redirected to <code>order.returnUrl?caps_transaction_id=&lt;id&gt;</code>.</li>
+  <li><strong>Failure (REJECT):</strong> <code>error</code> param → <code>epassi_failed</code> with the raw message.</li>
+  <li><strong>Cancellation (CANCEL):</strong> the CANCEL URL is <strong>identical</strong> to RETURN/REJECT; a user cancel arrives as <code>error</code> and is recorded as <code>epassi_failed (0)</code>. <code>epassi_canceled (4)</code> only comes from the explicit cancel API.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s6">6 · Transaction Lifecycle</h2>
+
+<h3>6.1 End-to-end sequence diagram</h3>
+<div class="diagram">
+<svg viewBox="0 0 960 620" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arwg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arwo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b"/>
+    </marker>
+  </defs>
+
+  <!-- lifelines -->
+  <g font-weight="700" font-size="14" text-anchor="middle" fill="#e2e8f0">
+    <rect x="30"  y="20" width="150" height="40" rx="9" fill="#1d4ed8"/><text x="105" y="45">RX</text>
+    <rect x="250" y="20" width="170" height="40" rx="9" fill="#0e7490"/><text x="335" y="45">caps-ui</text>
+    <rect x="490" y="20" width="170" height="40" rx="9" fill="#4338ca"/><text x="575" y="45">caps-be</text>
+    <rect x="730" y="20" width="180" height="40" rx="9" fill="#047857"/><text x="820" y="45">ePassi</text>
+  </g>
+  <g stroke="#334155" stroke-dasharray="5 5" stroke-width="1.5">
+    <line x1="105" y1="60" x2="105" y2="600"/>
+    <line x1="335" y1="60" x2="335" y2="600"/>
+    <line x1="575" y1="60" x2="575" y2="600"/>
+    <line x1="820" y1="60" x2="820" y2="600"/>
+  </g>
+
+  <!-- messages -->
+  <g stroke="#38bdf8" stroke-width="2" fill="none" marker-end="url(#arw)">
+    <line x1="105" y1="95"  x2="330" y2="95"/>
+    <line x1="335" y1="135" x2="570" y2="135"/>
+    <line x1="335" y1="290" x2="815" y2="290"/>
+    <line x1="335" y1="560" x2="570" y2="560"/>
+  </g>
+  <g stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arwg)">
+    <line x1="820" y1="230" x2="580" y2="230"/>
+    <line x1="820" y1="360" x2="580" y2="360"/>
+    <line x1="575" y1="455" x2="110" y2="455"/>
+  </g>
+  <g stroke="#f59e0b" stroke-width="2" fill="none" marker-end="url(#arwo)">
+    <line x1="575" y1="410" x2="815" y2="410"/>
+    <line x1="820" y1="505" x2="580" y2="505"/>
+  </g>
+
+  <!-- labels -->
+  <g fill="#cbd5e1" font-size="12.5">
+    <text x="115" y="88">render PayElement (type=epassi)</text>
+    <text x="345" y="128">POST /create-order</text>
+    <text x="600" y="112" fill="#a5b4fc" font-weight="700">① STAMP=uuid · INSERT status=1 · MAC</text>
+    <text x="345" y="158">{ data: EpassiForm }</text>
+    <text x="345" y="196" fill="#7dd3fc">② auto-POST hidden form</text>
+    <text x="590" y="223">③ pay on ePassi UI</text>
+    <text x="600" y="253" fill="#86efac">RETURN redirect · STAMP/PAID/MAC</text>
+    <text x="600" y="283" fill="#a5b4fc">verify MAC → status=6, visibleId=PAID</text>
+    <text x="590" y="353" fill="#86efac">④ webhook NOTIFY_URL · STAMP/PAID/MAC</text>
+    <text x="600" y="383" fill="#a5b4fc">verify MAC · if final → ignore</text>
+    <text x="600" y="433" fill="#fcd34d">GET /api/e2/passports/exist</text>
+    <text x="600" y="498" fill="#fcd34d">{ exists: true }</text>
+    <text x="390" y="448" fill="#86efac">⑤ 302 → order.returnUrl?caps_transaction_id=id</text>
+    <text x="345" y="553">GET /check-status/:id</text>
+    <text x="600" y="583" fill="#a5b4fc">status = succeeded</text>
+  </g>
+</svg>
+</div>
+<div class="legend">
+  <span><span class="dot" style="background:#38bdf8"></span> request / forward</span>
+  <span><span class="dot" style="background:#22c55e"></span> ePassi → CAPS / CAPS → RX</span>
+  <span><span class="dot" style="background:#f59e0b"></span> CAPS → ePassi verify</span>
+</div>
+
+<h3>6.2 CAPS status state machine</h3>
+<div class="diagram">
+<svg viewBox="0 0 940 330" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <rect x="380" y="20" width="200" height="70" rx="14" fill="#312e81" stroke="#6366f1" stroke-width="2"/>
+  <text x="480" y="48" text-anchor="middle" fill="#c7d2fe" font-weight="700">1 · signature_created</text>
+  <text x="480" y="70" text-anchor="middle" fill="#a5b4fc" font-size="12">form signed · "created"</text>
+
+  <!-- arrows -->
+  <g stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a2)">
+    <line x1="480" y1="90" x2="480" y2="140"/>
+    <line x1="380" y1="55" x2="185" y2="120"/>
+    <line x1="580" y1="55" x2="760" y2="120"/>
+  </g>
+  <g fill="#94a3b8" font-size="11.5">
+    <text x="490" y="118">redirect/webhook/verify</text>
+    <text x="150" y="100">redirect error param</text>
+    <text x="690" y="100">orphan / stale</text>
+  </g>
+
+  <rect x="360" y="145" width="240" height="70" rx="14" fill="#14532d" stroke="#16a34a" stroke-width="2"/>
+  <text x="480" y="173" text-anchor="middle" fill="#bbf7d0" font-weight="700">6 · epassi_successful</text>
+  <text x="480" y="195" text-anchor="middle" fill="#86efac" font-size="12">"succeeded" · visibleId=PAID</text>
+
+  <rect x="30" y="125" width="260" height="90" rx="14" fill="#450a0a" stroke="#dc2626" stroke-width="2"/>
+  <text x="160" y="153" text-anchor="middle" fill="#fecaca" font-weight="700">0 · epassi_failed</text>
+  <text x="160" y="174" text-anchor="middle" fill="#fca5a5" font-size="12">"failed" · reject / cancel / orphan</text>
+  <text x="160" y="195" text-anchor="middle" fill="#fca5a5" font-size="11">+ failureMessage</text>
+
+  <rect x="650" y="125" width="260" height="90" rx="14" fill="#450a0a" stroke="#dc2626" stroke-width="2"/>
+  <text x="780" y="153" text-anchor="middle" fill="#fecaca" font-weight="700">0 · epassi_failed</text>
+  <text x="780" y="174" text-anchor="middle" fill="#fca5a5" font-size="12">"Orphan Transaction"</text>
+  <text x="780" y="195" text-anchor="middle" fill="#fca5a5" font-size="11">terminateStale, no visibleId</text>
+
+  <rect x="360" y="245" width="240" height="70" rx="14" fill="#334155" stroke="#64748b" stroke-width="2"/>
+  <text x="480" y="273" text-anchor="middle" fill="#e2e8f0" font-weight="700">4 · epassi_canceled</text>
+  <text x="480" y="295" text-anchor="middle" fill="#cbd5e1" font-size="12">cancel API / refund</text>
+  <line x1="480" y1="215" x2="480" y2="245" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+  <text x="492" y="235" fill="#94a3b8" font-size="11.5">cancel / refund API</text>
+
+  <text x="30" y="30" fill="#64748b" font-size="12">Final states: <tspan font-weight="700">0</tspan>, <tspan font-weight="700">4</tspan>, <tspan font-weight="700">6</tspan> — both webhook and status check short-circuit once final.</text>
+</svg>
+</div>
+
+<h3>6.3 Cancel &amp; refund</h3>
+<table>
+  <tr><th>Operation</th><th>Entry</th><th>ePassi call</th><th>MAC</th><th>Result</th></tr>
+  <tr>
+    <td><strong>Cancel</strong></td>
+    <td><code>POST /cancel-order</code> → <code>vendor.cancel</code>; also orphan voiding</td>
+    <td><code>/api/e_payments/v2/cancel</code> (POST STAMP/SITE/MAC)</td>
+    <td><code>SHA512(STAMP&amp;SITE&amp;key)</code></td>
+    <td><code>epassi_canceled (4)</code>, <code>visibleId=passport_id</code></td>
+  </tr>
+  <tr>
+    <td><strong>Refund</strong></td>
+    <td><code>POST /refund-order</code> → <code>vendor.refund</code></td>
+    <td>same cancel endpoint</td>
+    <td><code>SHA512(STAMP&amp;SITE&amp;key)</code></td>
+    <td>new row <code>isRefund=true</code>, <code>linksTo=orig</code>, status <code>6</code></td>
+  </tr>
+</table>
+<div class="card gap">
+  <strong>Partial refunds are unsupported.</strong> If <code>refundOrder.amount !== trxnData.presentmentTotalAmount</code> the call returns <code>400</code> with <code>refund_order_issue — "Epassi (only full refund is supported)"</code>.
+</div>
+
+<h3>6.4 Orphan handling</h3>
+<ul>
+  <li><code>orphanProneVendors</code> includes <code>"epassi"</code> (<code>types/orphan.ts:84</code>).</li>
+  <li><code>processOrphan</code> calls <code>vendor.status(rawTransaction, <strong>true</strong>, <strong>true</strong>)</code>.</li>
+  <li>A stuck <code>signature_created</code> with no <code>visibleId</code> → failed <code>"Orphan Transaction"</code>; a not-found passport (with terminate) → <code>epassi_failed</code>.</li>
+  <li>Stale signatures are voided via the cancel API.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s7">7 · Error Handling &amp; Edge Cases</h2>
+<h3>7.1 Handled cases</h3>
+<table>
+  <tr><th>Case</th><th>Behaviour</th></tr>
+  <tr><td>DB insert fails at create</td><td><code>transaction_creation_error</code> · <code>SERVICE_UNAVAILABLE</code></td></tr>
+  <tr><td>ePassi rejects payment</td><td>redirect <code>error</code> → <code>epassi_failed (0)</code> + <code>failureMessage</code></td></tr>
+  <tr><td>MAC invalid on redirect</td><td>logged, <strong>no status change</strong></td></tr>
+  <tr><td>MAC invalid on webhook</td><td><code>401 signature_issue</code></td></tr>
+  <tr><td>Webhook missing STAMP/PAID/MAC</td><td><code>400 webhook_error</code></td></tr>
+  <tr><td>Webhook error notification</td><td><code>400 webhook_error</code></td></tr>
+  <tr><td><strong>Duplicate webhook (already final)</strong></td><td>ignored · <code>200 internal_cycle_closed</code></td></tr>
+  <tr><td>Webhook before redirect</td><td>both idempotent; first wins</td></tr>
+  <tr><td>Verification API unreachable / non-OK</td><td><code>"unknown"</code> → return local status (no failure)</td></tr>
+  <tr><td>Config missing credentials</td><td><code>INTERNAL_SERVER_ERROR</code></td></tr>
+  <tr><td>Stale signature, no <code>visibleId</code></td><td><code>terminateStaleTransactions</code> → <code>epassi_failed "Orphan Transaction"</code></td></tr>
+  <tr><td>Passport not found in ePassi</td><td><code>terminateStaleTransactions</code> → <code>epassi_failed</code></td></tr>
+  <tr><td>Partial refund requested</td><td><code>400 refund_order_issue</code></td></tr>
+  <tr><td>Cancel API error</td><td><code>cancel_order_issue</code> · HTTP passthrough / <code>EXPECTATION_FAILED</code></td></tr>
+  <tr><td><code>processExternal</code> fails</td><td><code>processFailure(...)</code> records a retryable failed attempt</td></tr>
+</table>
+
+<h3>7.2 Known gaps / incomplete areas</h3>
+<div class="card gap"><strong>No local seed for ePassi.</strong> Zero rows in <code>payment_gateways</code>, <code>pg_type</code> and <code>pg_status</code> for ePassi. A deploy needs an operator to insert the gateway (<code>username</code>=SITE, <code>password</code>=MAC key, <code>test</code>), a <code>pg_type</code> row, and matching <code>pg_status</code> description entries.</div>
+<div class="card gap"><strong>Dead constants.</strong> <code>epassi_pending (3)</code> and <code>epassi_processing (5)</code> are declared but never written.</div>
+<div class="card gap"><strong>Cancel vs. reject indistinguishable on redirect.</strong> Both yield <code>epassi_failed (0)</code>; only the cancel API yields <code>epassi_canceled (4)</code>.</div>
+<div class="card gap"><strong>Redirect does not call <code>processExternal</code>.</strong> RX learns the final status via the webhook or its own poll.</div>
+<div class="card gap"><strong>No partial refunds.</strong> Enforced by exact-amount equality.</div>
+<div class="card gap"><strong><code>confirm()</code> unsupported.</strong> Returns <code>400 confirm_not_needed</code>.</div>
+<div class="card gap"><strong>EUR only.</strong> <code>epassiCurrencyCodes = ["eur"]</code>; <code>processGateway</code> gates availability on <code>isEpassiCurrencyCode(currency)</code>.</div>
+<div class="card warnn"><strong>Test/prod coupling.</strong> The <code>test</code> flag drives both the client POST target and the server verify/cancel target; a mismatch would break MAC/verification consistency.</div>
+<div class="card warnn"><strong>No event-id dedupe store.</strong> The transaction status is the only dedupe key.</div>
+
+<!-- ============================================================ -->
+<h2 id="s8">8 · API &amp; Code References</h2>
+<h3>8.1 ePassi endpoints &amp; MAC formulas</h3>
+<table>
+  <tr><th>Purpose</th><th>Test</th><th>Prod</th></tr>
+  <tr><td>Payment Button (browser POST)</td><td><code>integration-testing.epassi.fi/e_payments/v2</code></td><td><code>services.epassi.fi/e_payments/v2</code></td></tr>
+  <tr><td>Cancel / Refund API</td><td><code>…/api/e_payments/v2/cancel</code></td><td><code>…/api/e_payments/v2/cancel</code></td></tr>
+  <tr><td>Payment verification</td><td><code>…/api/e2/passports/exist</code></td><td><code>…/api/e2/passports/exist</code></td></tr>
+</table>
+<table>
+  <tr><th>Signature</th><th>Formula</th></tr>
+  <tr><td>Create MAC</td><td><code>SHA512(STAMP &amp; SITE &amp; AMOUNT &amp; MAC_KEY)</code></td></tr>
+  <tr><td>Webhook MAC</td><td><code>SHA512(STAMP &amp; PAID &amp; MAC_KEY)</code></td></tr>
+  <tr><td>Cancel / Refund MAC</td><td><code>SHA512(STAMP &amp; SITE &amp; MAC_KEY)</code></td></tr>
+  <tr><td>Verification password</td><td><code>SHA512(PAID &amp; MAC_KEY &amp; SITE_LOGIN)</code></td></tr>
+</table>
+
+<h3>8.2 CAPS-BE endpoints</h3>
+<table>
+  <tr><th>Endpoint</th><th>Route file</th><th>ePassi processor</th></tr>
+  <tr><td><code>POST /create-order</code></td><td><code>routes/create-order.ts</code></td><td><code>createEpassi</code> (processOrder:203)</td></tr>
+  <tr><td><code>POST /webhooks/:id</code></td><td><code>routes/notify.ts</code></td><td><code>updateStatusEpassi</code> (processNotification:158)</td></tr>
+  <tr><td><code>GET /check-status/:id</code></td><td><code>routes/check-status.ts</code></td><td><code>checkStatusEpassi</code> (processStatusRequest:239)</td></tr>
+  <tr><td><code>ALL /redirect/:pgType?</code></td><td><code>routes/redirect.ts</code></td><td><code>processRedirect</code> epassi branch + <code>getEpassiConfig</code></td></tr>
+  <tr><td><code>POST /cancel-order</code></td><td><code>routes/cancel-order.ts</code></td><td><code>cancelEpassi</code> (processConfirmation:193)</td></tr>
+  <tr><td><code>POST /refund-order</code></td><td><code>routes/refund-order.ts</code></td><td><code>refundEpassi</code> (processRefund:275)</td></tr>
+  <tr><td><code>POST /confirm-order</code></td><td><code>routes/confirm-order.ts</code></td><td><code>confirm()</code> → <code>confirm_not_needed</code> (400)</td></tr>
+  <tr><td>Orphan rescue</td><td><code>routes/rescue-service.ts</code></td><td><code>processOrphan.ts:233</code></td></tr>
+</table>
+
+<h3>8.3 caps-be files</h3>
+<table>
+  <tr><th>File</th><th>Responsibility</th></tr>
+  <tr><td><code>vendors/epassi/index.ts</code></td><td><code>VendorEpassi</code>; <code>generateEpassiMac</code>, <code>verifyEpassiMac</code>, <code>isEpassiFinalStatus</code>; all URLs; <code>getEpassiWebhookUrl</code></td></tr>
+  <tr><td><code>vendors/epassi/create.ts</code></td><td><code>createEpassi</code> — UUID STAMP, DB insert, form, create MAC</td></tr>
+  <tr><td><code>vendors/epassi/status.ts</code></td><td><code>checkStatusEpassi</code>, <code>verifyEpassiPayment</code>, <code>finalizeStatus</code>, <code>buildResponseData</code></td></tr>
+  <tr><td><code>vendors/epassi/update.ts</code></td><td><code>updateStatusEpassi</code> — webhook handler</td></tr>
+  <tr><td><code>vendors/epassi/cancel.ts</code></td><td><code>cancelEpassi</code> — cancel API (also orphan voiding)</td></tr>
+  <tr><td><code>vendors/epassi/refund.ts</code></td><td><code>refundEpassi</code> — full refund only</td></tr>
+  <tr><td><code>types/vendors/epassi.ts</code></td><td><code>EpassiForm</code>, <code>EpassiWebhookNotification</code>, <code>EpassiVerificationResponse</code>, <code>EpassiCancelRequest/Response</code></td></tr>
+  <tr><td><code>processors/processRedirect.ts</code></td><td>epassi branch (~103-148); <code>getEpassiConfig</code> (~203); <code>firstParam</code></td></tr>
+  <tr><td><code>routes/redirect.ts</code></td><td>query+body merge; <code>redirectRequest</code> persistence</td></tr>
+  <tr><td><code>utils/paymentStatus.ts</code></td><td><code>pstatus</code> ePassi codes (:126-132); <code>istatus</code></td></tr>
+  <tr><td><code>types/currency.ts</code></td><td><code>isEpassiCurrencyCode</code> (EUR only)</td></tr>
+  <tr><td><code>types/orphan.ts</code></td><td><code>epassi</code> in <code>orphanProneVendors</code> (:84)</td></tr>
+  <tr><td><code>utils/format.ts</code></td><td><code>getCapsRedirectUrl</code></td></tr>
+</table>
+
+<h3>8.4 caps-ui files</h3>
+<table>
+  <tr><th>File</th><th>Responsibility</th></tr>
+  <tr><td><code>…/Type/Epassi/EpassiElement.tsx</code></td><td>pay handler → <code>POST /create-order</code>; renders logo, button, form</td></tr>
+  <tr><td><code>…/Type/Epassi/EpassiPaymentForm.tsx</code></td><td>auto-submitting hidden form</td></tr>
+  <tr><td><code>…/Type/Epassi/EpassiLogo.tsx</code></td><td>logo</td></tr>
+  <tr><td><code>…/Type/index.ts</code></td><td>registration <code>epassi: { component: EpassiElement }</code> (:108-110)</td></tr>
+  <tr><td><code>types/Epassi.ts</code></td><td><code>EpassiForm</code> type; test/prod Payment Button URLs</td></tr>
+  <tr><td><code>types/paymentType.ts</code></td><td><code>epassiPaymentType</code> → "Epassi" (:132)</td></tr>
+  <tr><td><code>types/CurrencyCodes.ts</code></td><td><code>epassiCurrencyCodes = ["eur"]</code> (:245)</td></tr>
+  <tr><td><code>types/Gateway.ts</code></td><td><code>"epassi"</code> in gateway union (:31)</td></tr>
+  <tr><td><code>PayElement/PayElement.tsx</code></td><td>generic dispatcher via <code>typeConfig[gateway.type]</code></td></tr>
+  <tr><td><code>functions/checkStatus/checkStatus.ts</code></td><td><code>GET /check-status/:id</code></td></tr>
+</table>
+
+<h3>8.5 RX files</h3>
+<p>RX has <strong>no ePassi-specific source</strong>; it consumes the packaged UI.</p>
+<table>
+  <tr><th>File</th><th>Responsibility</th></tr>
+  <tr><td><code>package.json</code></td><td><code>"caps-ui": "file:caps-ui-2.3.1.tgz"</code></td></tr>
+  <tr><td><code>pages/programs/[program_id]/confirm-payment.tsx</code></td><td><code>checkStatus()</code> → <code>payment-registration</code></td></tr>
+  <tr><td><code>constants/PaymentStatus</code></td><td>generic status strings after <code>istatus</code> normalisation</td></tr>
+</table>
+
+<h3>8.6 Database</h3>
+<table>
+  <tr><th>Table</th><th>ePassi usage</th></tr>
+  <tr><td><code>caps.pg_transactions</code></td><td>one row per payment (and per refund <code>isRefund=true</code>, <code>linksTo=orig</code>); <code>STAMP = id = paymentId</code>; <code>visibleId</code> = <code>PAID</code>/<code>passport_id</code>; <code>redirectRequest</code> = merged redirect params</td></tr>
+  <tr><td><code>caps.payment_gateways</code></td><td><code>username</code>=SITE, <code>password</code>=MAC key, <code>test</code></td></tr>
+  <tr><td><code>caps.pg_type</code></td><td>routing (<code>return_fields</code>, <code>payment_id</code>) — <strong>not seeded locally</strong></td></tr>
+  <tr><td><code>caps.pg_status</code></td><td>status descriptions — <strong>no ePassi entries locally</strong></td></tr>
+</table>
+
+<footer>
+  Generated from the actual implementation in <code>caps-be</code>, <code>caps-ui</code> and <code>RX</code>.
+  Implemented behaviour and known gaps are distinguished explicitly throughout.
+</footer>
+
+</div>
+</body>
+</html>
