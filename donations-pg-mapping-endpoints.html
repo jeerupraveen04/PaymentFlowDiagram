@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Donations — PG Mapping Solution &amp; Action Items</title>
+<style>
+  :root {
+    --primary: #7677f4;
+    --primary-light: #f1f1fe;
+    --primary-dark: #5959b7;
+    --green: #15af53;
+    --green-light: #e8f7ee;
+    --orange: #fd7e14;
+    --orange-light: #fff2e8;
+    --yellow: #ffc107;
+    --yellow-light: #fff9e6;
+    --grey2-light: #f5f5f5;
+
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --ink: #1f2233;
+    --muted: #5c617d;
+    --line: #e4e6ef;
+    --stroke: #d9dce8;
+    --code-bg: #f3f4f8;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 100px; }
+
+  header.title {
+    background: linear-gradient(135deg, #ffffff 0%, #f6f5ff 100%);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 30px 34px;
+    box-shadow: 0 2px 10px rgba(20, 22, 40, 0.06);
+    margin-bottom: 26px;
+  }
+  header.title h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.5px; }
+  header.title p { margin: 0; color: var(--muted); max-width: 860px; }
+  .badges { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    display: inline-block; border-radius: 999px; padding: 3px 12px;
+    font-size: 12.5px; font-weight: 650;
+  }
+  .badge.b-primary { background: var(--primary-light); color: var(--primary-dark); }
+  .badge.b-green { background: var(--green-light); color: #0d7d3c; }
+  .badge.b-orange { background: var(--orange-light); color: #b8560b; }
+  .badge.b-yellow { background: var(--yellow-light); color: #8a6500; }
+  .badge.b-grey { background: var(--grey2-light); color: #555; }
+
+  h2 {
+    font-size: 22px; margin: 46px 0 8px; letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    background: var(--primary); color: #fff; width: 30px; height: 30px;
+    border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; flex: 0 0 auto;
+  }
+  h3 { font-size: 16.5px; margin: 26px 0 10px; color: #2d3150; }
+  .sub { color: var(--muted); margin: 4px 0 20px; }
+  p { margin: 10px 0; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 1px 5px; font-size: 12.7px;
+  }
+  pre {
+    background: #1e2030; color: #e8e9f3; border-radius: 12px; padding: 16px 20px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.6;
+  }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+  .toc {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 26px; margin: 18px 0;
+  }
+  .toc h3 { margin: 4px 0 8px; }
+  .toc a { color: var(--primary-dark); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin: 3px 0; }
+
+  .m-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(20,22,40,.05);
+  }
+  .m-card-head { padding: 18px 20px 12px; border-bottom: 1px solid var(--line); }
+  .m-card-body { padding: 18px 20px; }
+  .m-title { font-size: 17px; font-weight: 700; }
+  .m-desc { font-size: 12.9px; color: var(--muted); }
+  .m-icon {
+    width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 20px; flex: 0 0 auto;
+  }
+  .ic-blue { background: var(--primary-light); color: var(--primary); }
+  .ic-orange { background: var(--orange-light); color: var(--orange); }
+  .ic-green { background: var(--green-light); color: var(--green); }
+  .ic-yellow { background: var(--yellow-light); color: #b8860b; }
+
+  .m-btn {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 10px;
+    padding: 7px 15px; font-size: 13px; font-weight: 650; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .m-btn.primary { background: var(--primary); color: #fff; }
+  .m-btn.outline { background: #fff; border-color: var(--stroke); color: #454a6b; }
+
+  table.m-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.m-table th {
+    text-align: left; padding: 9px 12px; background: #fafaff; color: #2d3150;
+    font-weight: 650; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  table.m-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.m-table tr:last-child td { border-bottom: none; }
+
+  .m-badge {
+    display: inline-block; border-radius: 999px; padding: 2px 9px; font-size: 11.3px;
+    font-weight: 650; white-space: nowrap;
+  }
+  .bd-primary { background: var(--primary-light); color: var(--primary-dark); }
+  .bd-warn { background: var(--yellow-light); color: #8a6500; }
+  .bd-ok { background: var(--green-light); color: #0d7d3c; }
+  .bd-grey { background: var(--grey2-light); color: #555; }
+
+  .m-section {
+    display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 14px;
+    margin: 20px 0 12px;
+  }
+  .m-section .pill { width: 30px; height: 30px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 15px; }
+
+  .callout {
+    border-radius: 10px; padding: 12px 16px; font-size: 13.3px; margin: 14px 0;
+    border-left: 4px solid;
+  }
+  .callout.info { background: var(--primary-light); border-color: var(--primary); color: #33356b; }
+  .callout.warn { background: var(--yellow-light); border-color: var(--yellow); color: #6e5200; }
+  .callout.good { background: var(--green-light); border-color: var(--green); color: #0b5f2f; }
+
+  .caption { text-align: center; font-size: 12.6px; color: var(--muted); margin: 8px 0 0; }
+  .two-col { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .step-list { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  .step-list li {
+    position: relative; padding: 8px 0 8px 40px; font-size: 13.6px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-list li::before {
+    counter-increment: s; content: counter(s); position: absolute; left: 0; top: 8px;
+    width: 26px; height: 26px; border-radius: 8px; background: var(--primary-light);
+    color: var(--primary-dark); font-weight: 700; font-size: 12.5px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kbd {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 11.8px;
+    border: 1px solid var(--stroke); border-bottom-width: 2px; border-radius: 6px;
+    padding: 1px 6px; background: #fff;
+  }
+
+  /* ---- method pills ---- */
+  .http { display:inline-block; border-radius:6px; padding:1px 8px; font-size:11.5px;
+          font-weight:800; letter-spacing:.3px; font-family:"SF Mono",ui-monospace,Menlo,monospace; }
+  .http.get { background:#e3f2fd; color:#0d47a1; }
+  .http.post { background:#e8f5e9; color:#1b5e20; }
+  .http.put { background:#fff3e0; color:#b8560b; }
+  .http.patch { background:#f3e5f5; color:#6a1b9a; }
+  .http.del { background:#ffebee; color:#b71c1c; }
+  .endpoint { font-family:"SF Mono", ui-monospace, Menlo, monospace; font-size:13px; }
+  .code-block { background:#1e2030; color:#e8e9f3; border-radius:12px; padding:16px 20px;
+                overflow-x:auto; font-size:12.4px; line-height:1.6; margin:14px 0; white-space:pre; }
+  .code-block .c { color:#8b93b8; }
+  .code-block .k { color:#c792ea; }
+  .code-block .s { color:#c3e88d; }
+  .code-block .t { color:#82aaff; }
+  .filetree { font-family:"SF Mono", ui-monospace, Menlo, monospace; font-size:12.6px;
+              background:#f7f8fc; border:1px solid var(--line); border-radius:12px; padding:14px 18px;
+              line-height:1.75; white-space:pre; overflow-x:auto; }
+  .filetree .new { color:#0d7d3c; font-weight:700; }
+  .filetree .mod { color:#b8560b; font-weight:700; }
+  .pill-row { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .api-card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:0; margin:16px 0;
+              overflow:hidden; box-shadow:0 1px 2px rgba(20,22,40,.05); }
+  .api-card-head { padding:14px 18px; border-bottom:1px solid var(--line); background:#fafaff;
+                   display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .api-card-body { padding:16px 18px; }
+  .api-card h4 { margin:0; font-size:14.6px; }
+  .meta-table { font-size:12.8px; }
+  .meta-table td:first-child { white-space:nowrap; width:1%; }
+  .flow-mini { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0; font-size:12.6px; }
+  .flow-mini .box { border:1px solid var(--stroke); border-radius:9px; padding:6px 11px; background:#fff; }
+  .flow-mini .box.hi { border-color:var(--primary); background:var(--primary-light); }
+  .flow-mini .box.db { border-color:#ffd9ad; background:#fffaf3; }
+  .flow-mini .box.ok { border-color:#b9e6cb; background:#f6fdf9; }
+  .flow-mini .ar { color:var(--muted); font-weight:700; }
+
+  /* ---- diagram (swimlane) ---- */
+  .diagram { background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+             padding: 26px 22px; overflow-x: auto; }
+  .lanes { display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); gap: 16px; min-width: 920px; }
+  .lane-head { border-radius: 12px; padding: 10px 14px; text-align: center; font-weight: 700;
+               font-size: 14px; color: #fff; }
+  .lane-head small { display: block; font-weight: 500; font-size: 11.5px; opacity: 0.92; }
+  .lh-ui { background: linear-gradient(135deg, #7677f4, #5959b7); }
+  .lh-api { background: linear-gradient(135deg, #6a6bdc, #474792); }
+  .lh-db { background: linear-gradient(135deg, #fd7e14, #ca6510); }
+  .lh-consumer { background: linear-gradient(135deg, #15af53, #0d7d3c); }
+  .lane-body { display: flex; flex-direction: column; gap: 12px; margin-top: 12px;
+               border-left: 2px dashed var(--stroke); padding-left: 12px; min-height: 100%; }
+  .lane-body.first { border-left: none; padding-left: 0; }
+  .node { background: #fff; border: 1px solid var(--stroke); border-radius: 12px;
+          padding: 11px 13px; box-shadow: 0 1px 2px rgba(20,22,40,.05); font-size: 13px; position: relative; }
+  .node .step { position: absolute; top: -9px; left: -9px; width: 22px; height: 22px;
+                border-radius: 50%; background: var(--primary); color: #fff; font-size: 11.5px;
+                font-weight: 700; display: flex; align-items: center; justify-content: center;
+                box-shadow: 0 0 0 3px #fff; }
+  .node strong { display: block; font-size: 13.2px; margin-bottom: 2px; }
+  .node .ep { display: inline-block; font-family: "SF Mono", ui-monospace, Menlo, monospace;
+              font-size: 11.3px; background: #fff; border: 1px solid var(--stroke);
+              border-radius: 6px; padding: 1px 6px; margin-top: 5px; color: #343a5e; }
+  .node.persist { border-color: #ffd9ad; background: #fffaf3; }
+  .node.read { border-color: #b9e6cb; background: #f6fdf9; }
+  .m-get .ep { color: #0d7d3c; }
+  .m-write .ep { color: #b8560b; }
+  .arrow { text-align: center; color: var(--muted); font-size: 22px; line-height: 1; margin: -4px 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px;
+            padding-top: 16px; border-top: 1px dashed var(--line); font-size: 12.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 13px; height: 13px; border-radius: 4px; border: 1px solid var(--stroke); }
+
+  footer {
+    margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.6px; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="title">
+  <h1>Donations — PG Mapping Solution &amp; Action Items</h1>
+  <p>How the CAPS Admin maps a payment gateway <b>per donation</b>. Selecting a gateway creates a
+     <code>caps.pg_mapping</code> row whose <code>metadata</code> carries the donation id (<code>program_id</code>).
+     This page covers the solution and the two action items to implement it.</p>
+  <div class="badges">
+    <span class="badge b-primary">caps-ui · function</span>
+    <span class="badge b-green">donation-be · endpoint</span>
+    <span class="badge b-orange">bx-be-nestjs · endpoint</span>
+    <span class="badge b-yellow">caps · pg_mapping</span>
+  </div>
+</header>
+
+<div class="toc">
+  <h3>On this page</h3>
+  <ol>
+    <li><a href="#solution">The donation solution</a></li>
+    <li><a href="#ai1">Action Item 1 — <code>customFetchGateway</code> in caps-ui</a></li>
+    <li><a href="#ai2">Action Item 2 — donation-be + bx-be-nestjs endpoints</a></li>
+    <li><a href="#matching">The matching logic — fetch, diff, insert missing</a></li>
+    <li><a href="#flow">End-to-end flow</a></li>
+    <li><a href="#code">Code &amp; file changes</a></li>
+    <li><a href="#data">SQL &amp; data model</a></li>
+  </ol>
+</div>
+
+<!-- ================= 1. SOLUTION ================= -->
+<h2 id="solution"><span class="num">1</span> The donation solution</h2>
+<p class="sub">Two interacting flows: the admin <b>fetches</b> the gateway list for a donation project
+  (Action Item 1), then <b>saving a selection creates the missing mappings</b> in <code>caps.pg_mapping</code>
+  (Action Item 2).</p>
+
+<div class="two-col">
+  <div class="m-card" style="padding:6px 20px 16px">
+    <h3 style="margin-top:14px">What problem it solves</h3>
+    <ul style="font-size:13.6px;padding-left:18px">
+      <li>A donation needs its own set of payment gateways.</li>
+      <li>The same gateway (e.g. Stripe) may serve <b>many</b> donations — so it must be mapped once per donation.</li>
+      <li>The mapping key is <code>(entity_id, pg_id, metadata)</code>, and <code>metadata.program_id</code> holds the donation id — that is what makes the same gateway legal per donation.</li>
+      <li>When an admin selects gateways, only the ones <b>not already mapped for that project</b> should be inserted (idempotent).</li>
+    </ul>
+  </div>
+  <div class="m-card" style="padding:6px 20px 16px">
+    <h3 style="margin-top:14px">The two action items</h3>
+    <div class="flow-mini" style="flex-direction:column;align-items:stretch;gap:10px">
+      <span class="box hi">① <b>caps-ui</b> — <code>customFetchGateway</code><br>
+        <span class="m-desc">fetch the full configured gateway list (dropdown)</span></span>
+      <span class="box db">② <b>donation-be</b> + <b>bx-be-nestjs</b> — create endpoint<br>
+        <span class="m-desc">compare selection with existing mappings, insert the missing rows</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="callout info">
+  <b>Where the donation id goes.</b> It is stored in
+  <code>caps.pg_mapping.metadata → {"program_id": &lt;donationId&gt;}</code>. At checkout,
+  <code>caps-be</code> matches mappings by comparing the incoming metadata (which carries the
+  <code>program_id</code>) against each row's metadata — a subset match.
+</div>
+
+<!-- ================= 2. ACTION ITEM 1 ================= -->
+<h2 id="ai1"><span class="num">2</span> Action Item 1 — <code>customFetchGateway</code> in caps-ui</h2>
+<p class="sub">A new exported function in <b>caps-ui</b>, built exactly like the existing
+  <code>checkStatus</code> and <code>refundOrder</code> functions: same folder shape, same
+  <code>customFetch</code>/<code>setCurrentLocale</code> usage, same <code>{ data }</code> /
+  <code>{ error }</code> return contract.</p>
+
+<h3>2.1 &nbsp;Folder shape (mirrors <code>checkStatus</code> / <code>refundOrder</code>)</h3>
+<div class="filetree"><span class="new">A</span> src/functions/customFetchGateway/customFetchGateway.ts
+<span class="new">A</span> src/functions/customFetchGateway/customFetchGateway.types.ts
+<span class="new">A</span> src/functions/customFetchGateway/index.ts
+<span class="mod">M</span> src/functions/index.ts                                  <span class="c">// export * from "./customFetchGateway"</span></div>
+<p class="m-desc" style="margin:10px 2px 0">Fetches the full gateway list for the entity (no project filter) — the caller feeds the result into the Action Item 2 sync.</p>
+
+<h3>2.2 &nbsp;The function</h3>
+<div class="api-card">
+  <div class="api-card-head">
+    <span class="m-badge bd-primary">caps-ui</span>
+    <span class="endpoint">customFetchGateway(props)</span>
+    <span class="m-badge bd-grey">mirrors checkStatus()</span>
+  </div>
+  <div class="api-card-body">
+    <div class="code-block"><span class="c">// src/functions/customFetchGateway/customFetchGateway.ts</span>
+<span class="k">import</span> { GatewayListResponse } <span class="k">from</span> <span class="s">"@/types"</span>;
+<span class="k">import</span> { customFetch, getCurrentLocale, setCurrentLocale } <span class="k">from</span> <span class="s">"@/utils"</span>;
+<span class="k">import</span> { CustomFetchGatewayProps } <span class="k">from</span> <span class="s">"./customFetchGateway.types"</span>;
+
+<span class="k">export const</span> <span class="t">customFetchGateway</span> = <span class="k">async</span> ({
+  environment,
+  country,
+  currency,
+  module,
+  org,
+  test,
+  locale,
+}: CustomFetchGatewayProps) =&gt; {
+  setCurrentLocale(locale);
+
+  <span class="c">// POST /fetch-gateways — returns ALL gateways for the entity</span>
+  <span class="k">const</span> response = <span class="k">await</span> customFetch(environment, <span class="s">"/fetch-gateways"</span>, <span class="s">"POST"</span>, {
+    country,
+    currency,
+    module,                       <span class="c">// donation module, e.g. "DN"</span>
+    org,
+    test,
+    locale: getCurrentLocale(),
+  });
+
+  <span class="k">try</span> {
+    <span class="k">const</span> gatewayResponse = <span class="k">await</span> response.json();
+    <span class="k">if</span> (!response.ok) {
+      <span class="k">return</span> { error: <span class="s">`Could not fetch gateways from caps-be : ${gatewayResponse.error}`</span> };
+    }
+    <span class="k">return</span> { data: gatewayResponse.data <span class="k">as</span> GatewayListResponse };
+  } <span class="k">catch</span> (err) {
+    console.error(<span class="s">"Error while fetching gateways:"</span>, err);
+    <span class="k">return</span> { error: <span class="s">"Fetching gateways failed due to an unexpected error"</span> };
+  }
+};</div>
+  </div>
+</div>
+
+<h3>2.3 &nbsp;Types</h3>
+<div class="code-block"><span class="c">// src/functions/customFetchGateway/customFetchGateway.types.ts</span>
+<span class="k">import</span> { CapsEnvironment, CountryCode, CurrencyCode } <span class="k">from</span> <span class="s">"@/types"</span>;
+<span class="k">import</span> { Locale } <span class="k">from</span> <span class="s">"@/utils"</span>;
+
+<span class="k">export type</span> <span class="t">CustomFetchGatewayProps</span> = {
+  environment: CapsEnvironment;
+  country: CountryCode;
+  currency: CurrencyCode;
+  module: string;          <span class="c">// e.g. "DN" for donations</span>
+  org: number;
+  test: boolean;
+  locale?: Locale;
+};</div>
+
+<div class="callout good">
+  <b>Same contract as the siblings.</b> Like <code>checkStatus</code>/<code>refundOrder</code>,
+  <code>customFetchGateway</code> returns <code>{ data }</code> on success and <code>{ error }</code> on
+  failure, calls <code>setCurrentLocale(locale)</code> first, and uses <code>customFetch(environment, …)</code>
+  so the correct CAPS base URL + API key are chosen per environment.
+  It returns <b>all</b> gateways for the entity — no project/metadata filter here; the filtering that
+  decides which are already mapped happens in <b>Action Item 2</b>.
+</div>
+
+<!-- ================= 3. ACTION ITEM 2 ================= -->
+<h2 id="ai2"><span class="num">3</span> Action Item 2 — donation-be + bx-be-nestjs endpoints</h2>
+<p class="sub">Two new endpoints. <b>donation-be</b> receives the donation id and the admin-selected
+  <code>paymentGatewayId</code> and forwards them. <b>bx-be-nestjs</b> (the NestJS API that
+  owns CAPS Admin) does the fetch → compare → insert-missing work. Reads use <code>caps.vw_pg_mapping</code>;
+  inserts go to <code>caps.pg_mapping</code>.</p>
+
+<h3>3.1 &nbsp;Endpoint in donation-be</h3>
+<div class="api-card">
+  <div class="api-card-head">
+    <span class="http post">POST</span>
+    <span class="endpoint">donation/gateway-mapping</span>
+    <span class="m-badge bd-ok">new</span>
+    <span class="m-badge bd-grey">donation-be</span>
+  </div>
+  <div class="api-card-body">
+    <p><b>Receives</b> the donation id and the gateway the admin selected (one, or an array):</p>
+    <div class="code-block">{
+  <span class="s">"donationId"</span>: 1127694,
+  <span class="s">"paymentGatewayId"</span>: 3,      <span class="c">// Number(pg.pgId) selected in the admin UI (or [3, 7])</span>
+  <span class="s">"country"</span>: <span class="s">"NZ"</span>, <span class="s">"org"</span>: 4, <span class="s">"module"</span>: <span class="s">"DN"</span>, <span class="s">"test"</span>: false
+}</div>
+    <p><b>Does:</b> forwards the body to bx-be-nestjs unchanged, then returns the sync result.</p>
+    <div class="code-block"><span class="c">// donation-be → bx-be-nestjs</span>
+POST <span class="s">&lt;bx-be-nestjs&gt;/pf/caps/payment-gateways/donation-mapping</span>
+{
+  <span class="s">"donationId"</span>: 1127694,
+  <span class="s">"paymentGatewayId"</span>: 3,
+  <span class="s">"country"</span>: <span class="s">"NZ"</span>, <span class="s">"org"</span>: 4, <span class="s">"module"</span>: <span class="s">"DN"</span>, <span class="s">"test"</span>: false
+}</div>
+    <p class="m-desc">The <code>id: Number(pg.pgId)</code> value the admin selected is the
+      <code>payment_gateway_id</code> — it becomes <code>pg_mapping.pg_id</code>.</p>
+  </div>
+</div>
+
+<h3>3.2 &nbsp;Endpoint in bx-be-nestjs</h3>
+<div class="api-card">
+  <div class="api-card-head">
+    <span class="http post">POST</span>
+    <span class="endpoint">pf/caps/payment-gateways/donation-mapping</span>
+    <span class="m-badge bd-ok">new</span>
+    <span class="m-badge bd-grey">@CanAccess PF::common-caps · admin</span>
+  </div>
+  <div class="api-card-body">
+    <p><b>Body:</b></p>
+    <table class="m-table meta-table">
+      <tbody>
+        <tr><td><code>donationId</code></td><td>Donation id → matched against <code>metadata.program_id</code>.</td></tr>
+        <tr><td><code>paymentGatewayId</code></td><td>The admin-selected gateway id (<code>Number(pg.pgId)</code>), or an array of ids.</td></tr>
+        <tr><td><code>country</code> / <code>org</code> / <code>module</code></td><td>Resolve the CAPS entity (<code>caps.pg_entity</code>) and drive the <code>fetchGateways</code> call.</td></tr>
+        <tr><td><code>test</code></td><td>Test vs live set.</td></tr>
+      </tbody>
+    </table>
+    <p><b>Response:</b></p>
+    <div class="code-block">{
+  <span class="s">"message"</span>: <span class="s">"Donation gateway mappings synced successfully"</span>,
+  <span class="s">"data"</span>: {
+    <span class="s">"inserted"</span>: [ 7 ],        <span class="c">// newly mapped for this donation</span>
+    <span class="s">"alreadyMapped"</span>: [ 3 ],   <span class="c">// existed already — skipped</span>
+    <span class="s">"entityId"</span>: 102,
+    <span class="s">"donationId"</span>: 1127694
+  }
+}</div>
+  </div>
+</div>
+
+<div class="callout warn">
+  <b>Route order.</b> Declare the literal <code>donation-mapping</code> route <b>before</b> the
+  <code>:id</code> param routes in the controller, so it is not captured as an <code>:id</code>.
+</div>
+
+<!-- ================= 4. MATCHING ================= -->
+<h2 id="matching"><span class="num">4</span> The matching logic — narrow flow</h2>
+<p class="sub">The Next.js (bx-be-nestjs) endpoint takes the body from donation-be, fetches the full
+  gateway list for the entity, compares it against the body's <code>paymentGatewayId</code>, and inserts a
+  mapping only for the ids that match and are not already mapped for that donation.</p>
+
+<h3>4.1 &nbsp;The body (Next.js endpoint)</h3>
+<div class="code-block">{
+  <span class="s">"donationId"</span>: 1127694,        <span class="c">// -> metadata.program_id</span>
+  <span class="s">"paymentGatewayId"</span>: 3,        <span class="c">// Number(pg.pgId) selected in the admin UI (or [3, 7])</span>
+  <span class="s">"country"</span>: <span class="s">"NZ"</span>, <span class="s">"org"</span>: 4, <span class="s">"module"</span>: <span class="s">"DN"</span>, <span class="s">"test"</span>: false
+}</div>
+
+<h3>4.2 &nbsp;Narrow flow (step by step)</h3>
+<ol class="step-list">
+  <li><b>Take the body.</b> <code>donationId</code> + <code>paymentGatewayId</code>; the donation id becomes
+    <code>metadata = { program_id: donationId }</code> for the gateway fetch and the insert.</li>
+  <li><b>Use the custom gateway function.</b> Call <code>customFetchGateway()</code> (Action Item 1) with the
+    same <code>country, org, module, test</code> — it POSTs <code>/fetch-gateways</code> and returns the
+    <b>full list of configured PG</b> for the entity.</li>
+  <li><b>Compare the lists.</b> Keep the fetched gateways whose <code>id</code> is in the body's
+    <code>paymentGatewayId</code> → the ones the admin selected that CAPS actually offers.</li>
+  <li><b>Check what is already mapped.</b> From <code>caps.vw_pg_mapping</code> for this entity, take rows
+    whose <code>metadata.program_id === donationId</code> → the ids already mapped for <em>this</em> donation.</li>
+  <li><b>Insert only the missing.</b> For each matched id <b>not</b> already mapped, INSERT into
+    <code>caps.pg_mapping</code> with <code>metadata = { program_id: donationId }</code> and a unique
+    <code>sort_order</code>.</li>
+  <li><b>Edge case — mapping already exists with a metadata value.</b> Do not violate
+    <code>UNIQUE (entity_id, pg_id, metadata)</code>: skip rows with the same
+    <code>(entity_id, pg_id, metadata)</code> instead of re-inserting.</li>
+</ol>
+
+<div class="flow-mini">
+  <span class="box">body<br><code>donationId=1127694<br>paymentGatewayId=3</code></span>
+  <span class="ar">→</span>
+  <span class="box hi">customFetchGateway()<br><code>metadata={program_id:1127694}</code></span>
+  <span class="ar">→</span>
+  <span class="box ok">fetch-gateways<br><code>configured PG [3, 6, 12, 26]</code></span>
+  <span class="ar">→</span>
+  <span class="box">compare<br><code>matched = [3]</code></span>
+</div>
+<div class="flow-mini">
+  <span class="box">existing for donation<br><code>vw_pg_mapping program_id=1127694</code></span>
+  <span class="ar">→</span>
+  <span class="box hi">diff<br><code>missing = matched − existing</code></span>
+  <span class="ar">→</span>
+  <span class="box db">INSERT <code>pg_id 3</code><br><code>metadata={program_id:1127694}</code></span>
+</div>
+
+<h3>4.3 &nbsp;Compare table</h3>
+<table class="m-table" style="font-size:12.9px">
+  <thead><tr><th>Step</th><th>Value</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>body selection</td><td><code>[3]</code></td><td>—</td></tr>
+    <tr><td>fetch-gateways (configured PG)</td><td><code>[3, 6, 12, 26]</code></td><td>—</td></tr>
+    <tr><td><b>matched</b> = selection ∩ configured</td><td><code>[3]</code></td><td>candidate</td></tr>
+    <tr><td>existing for donation 1127694</td><td><code>[]</code> (or <code>[3]</code>)</td><td>—</td></tr>
+    <tr><td><b>missing</b> = matched − existing</td><td><code>[3]</code> (or <code>[]</code>)</td><td><b>insert</b> (or skip)</td></tr>
+  </tbody>
+</table>
+
+<h3>4.4 &nbsp;Edge case — mapping already exists with a metadata value</h3>
+<div class="callout warn">
+  <b>Same key already present → skip, don't duplicate.</b> The unique key is
+  <code>(entity_id, pg_id, metadata)</code>. Test each candidate against the rows already fetched for this
+  donation:
+  <ul style="margin:8px 0 0">
+    <li><b>Exact same <code>(pg_id, metadata.program_id)</code> exists</b> → already mapped → add to
+      <code>alreadyMapped</code> and skip (no duplicate, no unique-violation).</li>
+    <li><b>Same <code>pg_id</code>, different <code>metadata.program_id</code></b> → a different donation →
+      <b>insert</b> (the key allows it — the same gateway serving another donation).</li>
+    <li><b>Same <code>pg_id</code>, <code>metadata IS NULL</code> row already exists</b> → Postgres treats
+      <code>NULL</code> as distinct, so the insert would still succeed; prefer matching on the
+      <code>program_id</code> value (not <code>pg_id</code> alone) to avoid an ambiguous duplicate.</li>
+  </ul>
+</div>
+<div class="callout good">
+  <b>Idempotent.</b> Re-running the endpoint inserts nothing the second time: the matched ids are already
+  present for the donation, so <code>missing</code> is empty → <code>inserted: []</code>,
+  <code>alreadyMapped: [3]</code>.
+</div>
+
+<h3>4.5 &nbsp;Reference implementation (Next.js service)</h3>
+<div class="code-block"><span class="c">// bx-be-nestjs — payment-gateways.service.ts</span>
+<span class="k">async</span> <span class="t">syncDonationMapping</span>(dto: DonationMappingDto) {
+  <span class="k">const</span> ids = Array.isArray(dto.paymentGatewayId) ? dto.paymentGatewayId : [dto.paymentGatewayId];
+
+  <span class="c">// 2) full list of configured PG for the entity (customFetchGateway → caps-be /fetch-gateways)</span>
+  <span class="k">const</span> fetched = <span class="k">await</span> <span class="k">this</span>.caps.fetchGateways({
+    country: dto.country, org: dto.org, module: dto.module, test: dto.test ?? <span class="k">false</span>,
+    metadata: { program_id: dto.donationId },
+  });
+  <span class="k">const</span> configuredIds = <span class="k">new</span> Set(fetched.map((g) =&gt; Number(g.id)));
+
+  <span class="c">// 3) keep only the ids that are both selected AND actually configured</span>
+  <span class="k">const</span> matched = ids.map(Number).filter((id) =&gt; configuredIds.has(id));
+
+  <span class="c">// 4) what is already mapped for THIS donation (match on metadata.program_id)</span>
+  <span class="k">const</span> eid = <span class="k">await</span> <span class="k">this</span>.repo.resolveEntityId(dto.country, dto.org, dto.module);
+  <span class="k">const</span> existing = <span class="k">await</span> <span class="k">this</span>.repo.listMappings(eid);   <span class="c">// reads caps.vw_pg_mapping</span>
+  <span class="k">const</span> alreadyForDonation = <span class="k">new</span> Set(
+    existing
+      .filter((r) =&gt; Number((r.metadata <span class="k">as</span> Record&lt;string, unknown&gt;)?.[<span class="s">'program_id'</span>]) === Number(dto.donationId))
+      .map((r) =&gt; Number(r.pgId)),
+  );
+
+  <span class="c">// 5) insert only the missing (skip ones already mapped for this donation)</span>
+  <span class="k">const</span> missing = matched.filter((id) =&gt; !alreadyForDonation.has(id));
+  <span class="k">if</span> (missing.length &gt; 0) {
+    <span class="k">const</span> nextOrder = existing.reduce((m, r) =&gt; Math.max(m, Number(r.sortOrder)), 0);
+    <span class="k">await</span> <span class="k">this</span>.repo.insertDonationMappings(
+      eid,
+      missing.map((pgId, i) =&gt; ({
+        entityId: eid, pgId, sortOrder: nextOrder + i + 1,
+        metadata: { program_id: Number(dto.donationId) },
+      })),
+    );
+  }
+
+  <span class="k">return</span> {
+    message: <span class="s">'Donation gateway mappings synced successfully'</span>,
+    data: {
+      inserted: missing,
+      alreadyMapped: matched.filter((id) =&gt; alreadyForDonation.has(id)),
+      entityId: eid,
+      donationId: Number(dto.donationId),
+    },
+  };
+}</div>
+
+<!-- ================= 5. FLOW ================= -->
+<h2 id="flow"><span class="num">5</span> End-to-end flow</h2>
+<div class="diagram">
+  <div class="lanes">
+    <div>
+      <div class="lane-head lh-ui">1 · CAPS Admin / caps-ui <small>donation gateway picker</small></div>
+      <div class="lane-body first">
+        <div class="node m-get"><span class="step">1</span><strong>Load dropdown</strong>
+          <code>customFetchGateway()</code> returns <b>all</b> gateways.
+          <div><span class="ep">POST caps-be /fetch-gateways</span></div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><span class="step">2</span><strong>Admin selects gateway(s)</strong>
+          picks e.g. <code>id: Number(pg.pgId)</code> = 3, 7.</div>
+        <div class="arrow">↓</div>
+        <div class="node m-write"><span class="step">3</span><strong>Save selection</strong>
+          <div><span class="ep">POST donation-be /gateway-mapping</span></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="lane-head lh-api">2 · donation-be <small>donation backend</small></div>
+      <div class="lane-body">
+        <div class="node m-write"><span class="step">4</span><strong>Receive</strong>
+          <code>donationId</code> + <code>paymentGatewayId</code>
+          + <code>country / org / module / test</code>.</div>
+        <div class="arrow">↓</div>
+        <div class="node m-write"><span class="step">5</span><strong>Forward</strong>
+          pass to bx-be-nestjs.
+          <div><span class="ep">POST …/donation-mapping</span></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="lane-head lh-consumer">3 · bx-be-nestjs <small>CAPS API</small></div>
+      <div class="lane-body">
+        <div class="node m-get"><span class="step">6</span><strong>Fetch + compare</strong>
+          <code>customFetchGateway()</code> → configured PG; keep the ids in
+          <code>paymentGatewayId</code>.</div>
+        <div class="arrow">↓</div>
+        <div class="node m-get"><span class="step">7</span><strong>Existing for donation</strong>
+          <code>caps.vw_pg_mapping</code> where <code>metadata.program_id = donationId</code>.</div>
+        <div class="arrow">↓</div>
+        <div class="node m-write"><span class="step">8</span><strong>Insert only missing</strong>
+          <code>{ inserted, alreadyMapped }</code>.</div>
+      </div>
+    </div>
+    <div>
+      <div class="lane-head lh-db">4 · caps DB <small>pg_mapping</small></div>
+      <div class="lane-body">
+        <div class="node persist"><span class="step">9</span><strong>New rows</strong>
+          <code>(entity_id, pg_id, sort_order, metadata)</code></div>
+        <div class="arrow">↓</div>
+        <div class="node persist"><span class="step">10</span><strong>Key allows per-project</strong>
+          <code>UNIQUE (entity_id, pg_id, metadata)</code></div>
+        <div class="arrow">↓</div>
+        <div class="node persist"><span class="step">11</span><strong>Trigger</strong>
+          <code>vendor_history</code> (dedup).</div>
+      </div>
+    </div>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:#f6fdf9;border-color:#b9e6cb"></i> read / fetch</span>
+    <span><i class="swatch" style="background:#fffaf3;border-color:#ffd9ad"></i> write / persist</span>
+    <span><i class="swatch" style="background:#fff;border-color:#7677f4"></i> UI action</span>
+  </div>
+</div>
+
+<!-- ================= 6. CODE ================= -->
+<h2 id="code"><span class="num">6</span> Code &amp; file changes</h2>
+<div class="filetree"><span class="c">// caps-ui</span>
+<span class="new">A</span> src/functions/customFetchGateway/customFetchGateway.ts
+<span class="new">A</span> src/functions/customFetchGateway/customFetchGateway.types.ts
+<span class="new">A</span> src/functions/customFetchGateway/index.ts
+<span class="mod">M</span> src/functions/index.ts
+
+<span class="c">// donation-be (new endpoint)</span>
+<span class="new">A</span> donation/gateway-mapping controller + service   <span class="c">// forwards to bx-be-nestjs</span>
+
+<span class="c">// bx-be-nestjs (new endpoint + logic)</span>
+<span class="new">A</span> src/modules/pf/caps/payment-gateways/dto/donation-mapping.dto.ts
+<span class="new">A</span> src/modules/pf/caps/payment-gateways/dto/donation-mapping-response.dto.ts
+<span class="mod">M</span> src/modules/pf/caps/payment-gateways/payment-gateways.controller.ts
+<span class="mod">M</span> src/modules/pf/caps/payment-gateways/payment-gateways.service.ts
+<span class="mod">M</span> src/modules/pf/caps/payment-gateways/payment-gateways.repository.ts</div>
+
+<h3>6.1 &nbsp;bx-be-nestjs controller</h3>
+<div class="code-block"><span class="c">// payment-gateways.controller.ts  (declare BEFORE ':id' routes)</span>
+@Post(<span class="s">'donation-mapping'</span>)
+@CanAccess([{ resource: <span class="s">'PF::common-caps'</span>, scope: <span class="s">'admin'</span> }])
+@UseInterceptors(CamelToSnakeInterceptor)
+@ApiOperation({ summary: <span class="s">'Create the missing PG mappings for a donation'</span> })
+syncDonationMapping(@Body() dto: DonationMappingDto) {
+  <span class="k">return</span> this.service.syncDonationMapping(dto);
+}</div>
+
+<h3>6.2 &nbsp;bx-be-nestjs DTO</h3>
+<div class="code-block"><span class="c">// dto/donation-mapping.dto.ts</span>
+<span class="k">export class</span> <span class="t">DonationMappingDto</span> {
+  @ApiProperty({ example: 1127694 }) @Type(() =&gt; Number) @IsInt()
+  donationId!: number;                    <span class="c">// -> metadata.program_id</span>
+
+  <span class="c">// single id, or an array of ids the admin selected</span>
+  @ApiProperty({ example: 3, oneOf: [{ type: <span class="s">'number'</span> }, { type: <span class="s">'array'</span>, items: { type: <span class="s">'number'</span> } }] })
+  @ValidateIf((o) =&gt; Array.isArray(o.paymentGatewayId))
+  @IsInt({ each: <span class="k">true</span> })
+  @ValidateIf((o) =&gt; !Array.isArray(o.paymentGatewayId))
+  @Type(() =&gt; Number) @IsInt()
+  paymentGatewayId!: number | number[];
+
+  @ApiProperty({ example: <span class="s">'NZ'</span> }) @IsString() country!: string;
+  @ApiProperty({ example: 4 }) @Type(() =&gt; Number) @IsInt() org!: number;
+  @ApiProperty({ example: <span class="s">'DN'</span> }) @IsString() module!: string;
+  @ApiProperty({ example: false, required: false }) @IsOptional() @IsBoolean() test?: boolean;
+}</div>
+
+<h3>6.3 &nbsp;bx-be-nestjs service — the diff &amp; insert</h3>
+<div class="callout info">
+  See <b>§4.5 Reference implementation</b> for the full <code>syncDonationMapping()</code> — it takes the
+  body, calls <code>customFetchGateway()</code> / <code>fetchGateways</code>, keeps the matched ids, filters
+  out the ones already mapped for the donation, and inserts only the missing.
+</div>
+
+<h3>6.4 &nbsp;bx-be-nestjs repository</h3>
+<div class="code-block"><span class="c">// payment-gateways.repository.ts — read from the view (preferred)</span>
+<span class="k">async</span> <span class="t">listMappings</span>(entityId: number) {
+  <span class="k">return</span> this.txHost.tx
+    .select({
+      pgId: vwPgMappingInCaps.pgId,
+      sortOrder: vwPgMappingInCaps.sortOrder,
+      metadata: vwPgMappingInCaps.metadata,
+    })
+    .from(vwPgMappingInCaps)
+    .where(eq(vwPgMappingInCaps.entityId, entityId));
+}
+
+@Transactional()
+<span class="k">async</span> <span class="t">insertDonationMappings</span>(entityId: number, rows: NewMappingRow[]) {
+  <span class="k">await</span> this.txHost.tx.insert(capsPgMappingSchema).values(rows);
+
+  this.auditLogger.info(<span class="s">'Donation PG mappings created'</span>, {
+    event_action: <span class="s">'create'</span>,
+    event_type: <span class="s">'entity_config'</span>,
+    event_id: entityId,
+  });
+}</div>
+<p class="m-desc" style="margin:6px 2px 0">
+  Reads come from the view <code>caps.vw_pg_mapping</code>; writes go to the base table
+  <code>caps.pg_mapping</code> (a view is read-only). To filter by project in SQL instead of in JS,
+  add <code>sql\`${vwPgMappingInCaps.metadata}->>'program_id' = ${String(donationId)}\`</code> to the
+  view query's <code>.where(...)</code>.
+</p>
+
+<h3>6.5 &nbsp;Verification checklist</h3>
+<ol class="step-list">
+  <li>Select <code>[3, 7]</code> for a fresh project → both inserted; response <code>inserted: [3,7]</code>.</li>
+  <li>Run again with <code>[3, 7]</code> → <code>inserted: []</code>, <code>alreadyMapped: [3,7]</code> (idempotent).</li>
+  <li>Select <code>[3, 7]</code>, then only <code>[3]</code> → nothing removed, nothing inserted for <code>3</code>.</li>
+  <li>Same <code>pg_id</code> on a <b>different</b> project → inserted (metadata differs → unique key allows).</li>
+  <li>Missing entity → <code>404</code>; bad DTO → <code>400</code>.</li>
+  <li><code>npm run lint</code>, <code>npx tsc --noEmit</code>, <code>npm run test:unit</code> pass.</li>
+</ol>
+
+<!-- ================= 7. DATA ================= -->
+<h2 id="data"><span class="num">7</span> SQL &amp; data model</h2>
+
+<h3>7.1 &nbsp;No migration needed</h3>
+<p><code>caps.pg_mapping.metadata</code> (jsonb) and the key
+  <code>UNIQUE (entity_id, pg_id, metadata)</code> already exist — the solution adds code on top of them.</p>
+
+<h3>7.2 &nbsp;The insert (per missing gateway)</h3>
+<div class="code-block"><span class="c">-- one row per missing gateway; metadata carries the donation project id</span>
+INSERT INTO caps.pg_mapping (entity_id, pg_id, sort_order, metadata)
+VALUES
+  (102, 7, 2, '{"program_id": 1127694}');</div>
+
+<h3>7.3 &nbsp;How the rows look</h3>
+<table class="m-table" style="font-size:12.9px">
+  <thead><tr><th>entity_id</th><th>pg_id</th><th>sort_order</th><th>metadata</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>102</td><td>3</td><td>1</td><td><code>{"program_id":1127694}</code></td><td>Stripe for donation project 1127694</td></tr>
+    <tr><td>102</td><td>7</td><td>2</td><td><code>{"program_id":1127694}</code></td><td>PayPal — <b>inserted</b> (was missing)</td></tr>
+    <tr><td>102</td><td>3</td><td>3</td><td><code>{"program_id":1127695}</code></td><td><b>same Stripe</b>, different project — legal</td></tr>
+    <tr><td>102</td><td>9</td><td>4</td><td><code>NULL</code></td><td>fallback — applies when nothing matches</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <b>NULL trap.</b> Postgres treats <code>NULL</code> as distinct in a UNIQUE constraint, so
+  <code>UNIQUE (entity_id, pg_id, metadata)</code> stops guarding whenever <code>metadata IS NULL</code>.
+  Because this feature always writes <code>{"program_id": …}</code>, that affects only legacy/fallback rows —
+  but making <code>metadata NOT NULL DEFAULT '{}'::jsonb</code> is the recommended hardening.
+</div>
+
+<div class="callout good">
+  <b>Checkout parity.</b> <code>caps-be</code> reads the same rows at donation checkout and matches by the
+  same rule: a row matches when every key in its <code>metadata</code> equals the incoming metadata (subset
+  match), with a fallback to <code>metadata IS NULL</code> rows.
+</div>
+
+<footer>
+  Donations · PG mapping solution &amp; action items · companion: <code>caps-admin-pg-mapping-diagram.html</code>
+</footer>
+
+</div>
+</body>
+</html>
