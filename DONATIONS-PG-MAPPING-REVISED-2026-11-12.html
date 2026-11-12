@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Donations — Payment Gateway Mapping (Revised)</title>
+<style>
+  :root {
+    --primary: #6d6ff2;
+    --primary-dark: #4f51c9;
+    --primary-light: #eeeefe;
+    --ink: #1d2033;
+    --muted: #5d6178;
+    --line: #e3e5ef;
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --green: #128a4b;
+    --green-light: #e8f7ee;
+    --amber: #a05a00;
+    --amber-light: #fff5e6;
+    --red: #b12a2a;
+    --red-light: #fdecec;
+    --blue: #1656a8;
+    --blue-light: #eaf2fd;
+    --code-bg: #1e2133;
+    --code-ink: #e8eaf6;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.62 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono { font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; }
+  code {
+    background: #f0f1f8;
+    border: 1px solid #e3e5ef;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.88em;
+    color: #33365a;
+    white-space: nowrap;
+  }
+  a { color: var(--primary-dark); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 26px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #2b2d5c 0%, #4a4cb3 55%, #6d6ff2 100%);
+    color: #fff;
+    padding: 52px 0 40px;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 5px 11px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+  header.hero h1 { margin: 0 0 10px; font-size: 38px; line-height: 1.15; letter-spacing: -0.02em; }
+  header.hero .sub { margin: 0 0 22px; font-size: 17px; color: #dfe1ff; max-width: 860px; }
+  header.hero code { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); color: #fff; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 4px 9px;
+    border-radius: 6px;
+  }
+  .badge.new { background: #ffffff; color: #3f41a8; border-color: #ffffff; }
+  .baseline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 18px;
+    margin-top: 4px;
+    font-size: 12.5px;
+  }
+  .baseline div span { display: block; color: #b9bbf6; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+  .baseline div b { color: #fff; font-weight: 600; }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 2px 12px rgba(30, 33, 61, 0.05);
+  }
+  nav.toc .wrap { display: flex; gap: 6px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; }
+  nav.toc a {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 5px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  nav.toc a:hover { background: var(--primary-light); color: var(--primary-dark); text-decoration: none; }
+
+  main { padding: 36px 0 70px; }
+  section { margin-bottom: 42px; scroll-margin-top: 66px; }
+  .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .section-num {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h2 { margin: 0; font-size: 25px; letter-spacing: -0.01em; line-height: 1.25; }
+  h3 { margin: 26px 0 10px; font-size: 18px; letter-spacing: -0.005em; }
+  h4 { margin: 20px 0 8px; font-size: 15px; }
+  p { margin: 0 0 12px; }
+  .lead { font-size: 16px; color: #3d415d; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 24px;
+    box-shadow: 0 1px 2px rgba(30,33,61,0.04);
+  }
+  .card + .card { margin-top: 14px; }
+
+  .comment {
+    border-left: 4px solid var(--primary);
+    background: var(--primary-light);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .comment .who { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary-dark); margin-bottom: 4px; }
+  .comment blockquote { margin: 0; font-style: italic; color: #34375c; }
+  .resolution { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #c9cbf0; font-size: 14px; }
+  .resolution b { color: var(--green); }
+
+  .callout { border-radius: 10px; padding: 14px 18px; margin: 14px 0; border: 1px solid; }
+  .callout .label { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .callout.green { background: var(--green-light); border-color: #bfe6ce; }
+  .callout.green .label { color: var(--green); }
+  .callout.amber { background: var(--amber-light); border-color: #f0d4a8; }
+  .callout.amber .label { color: var(--amber); }
+  .callout.red { background: var(--red-light); border-color: #f0c2c2; }
+  .callout.red .label { color: var(--red); }
+  .callout.blue { background: var(--blue-light); border-color: #c4d9f5; }
+  .callout.blue .label { color: var(--blue); }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.58;
+    margin: 12px 0 16px;
+    tab-size: 2;
+  }
+  pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; white-space: pre; }
+  pre .c { color: #8f95bd; }
+  pre .k { color: #a5b4ff; }
+  pre .s { color: #9fe0b2; }
+  pre .f { color: #ffd27a; }
+  pre .t { color: #7fd7e8; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13.5px; background: #fff; border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f2f3fa; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: #4a4d6c; }
+  tr:last-child td { border-bottom: 0; }
+  td code, th code { white-space: normal; }
+
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
+  .pill.add { background: var(--green-light); color: var(--green); }
+  .pill.mod { background: var(--amber-light); color: var(--amber); }
+  .pill.none { background: #eef0f7; color: var(--muted); }
+  .pill.del { background: var(--red-light); color: var(--red); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .flow { display: grid; gap: 10px; margin: 16px 0 22px; }
+  .lane {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .lane .who {
+    background: #f2f3fa;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #484b6d;
+    display: flex;
+    align-items: center;
+  }
+  .lane .what {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+  }
+  .lane .what b { color: #303361; }
+  .lane.ui .who { background: var(--primary-light); border-color: #d5d6f8; color: var(--primary-dark); }
+  .lane.be .who { background: #eef8f2; border-color: #c8e7d6; color: var(--green); }
+  .lane.caps .who { background: #fdf4ea; border-color: #f0d9bd; color: var(--amber); }
+  .lane.db .who { background: #fbeff0; border-color: #efc9cc; color: var(--red); }
+
+  .arrow { text-align: center; color: #9a9dbb; font-size: 16px; line-height: 0.8; margin: -4px 0; }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 12px 0 18px; }
+  .steps li { counter-increment: step; position: relative; padding: 0 0 14px 44px; }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    border: 1px solid #d5d6f8;
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .steps li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 13.5px;
+    top: 33px;
+    bottom: 2px;
+    width: 1px;
+    background: #dfe1f3;
+  }
+  .steps li b { color: #2e3160; }
+
+  .kv { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; font-size: 13.5px; }
+  .kv .k { color: var(--muted); font-weight: 700; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    background: #fff;
+    padding: 26px 0 40px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  footer .wrap { display: grid; gap: 6px; }
+  footer b { color: var(--ink); }
+
+  .file {
+    font-family: "SFMono-Regular", ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    color: #3b3f68;
+    background: #f6f6fc;
+    border: 1px solid #e6e7f2;
+    border-radius: 5px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+
+  @media print {
+    nav.toc { display: none; }
+    header.hero { padding: 28px 0; }
+    body { background: #fff; font-size: 12px; }
+    section { break-inside: avoid; }
+    pre { white-space: pre-wrap; word-break: break-word; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Revised design · reviewer comments applied</div>
+    <h1>Donations — Payment Gateway Mapping</h1>
+    <p class="sub">
+      A generic CAPS-Admin mapping sync, a shared <code>fetchGateways()</code> helper,
+      no new donations-be endpoint, and delete-and-reinsert sort order.
+    </p>
+    <div class="badges">
+      <span class="badge new">Rev 2 · 12 Nov 2026</span>
+      <span class="badge">caps-ui</span>
+      <span class="badge">bx-be-nestjs</span>
+      <span class="badge">donations-be</span>
+      <span class="badge">donations-fe</span>
+      <span class="badge">caps-be</span>
+      <span class="badge">bx-fe</span>
+    </div>
+    <div class="baseline">
+      <div><span>bx-be-nestjs</span><b>d874724a2</b></div>
+      <div><span>caps-ui</span><b>7659b70</b></div>
+      <div><span>caps-be</span><b>34c7025</b></div>
+      <div><span>donations-be</span><b>e135681</b></div>
+      <div><span>donations-fe</span><b>2c18a90</b></div>
+      <div><span>bx-fe</span><b>d2180e3611</b></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#changes">Comments → resolutions</a>
+    <a href="#solution">1 · Solution</a>
+    <a href="#action1">2 · fetchGateways()</a>
+    <a href="#action2">3 · Generic endpoint</a>
+    <a href="#action3">4 · donations-be method</a>
+    <a href="#sync">5 · Delete &amp; re-insert</a>
+    <a href="#sort">6 · Sort order</a>
+    <a href="#flow">7 · End-to-end</a>
+    <a href="#files">8 · File changes</a>
+    <a href="#matching">9 · Matching</a>
+    <a href="#reality">10 · Reality checks</a>
+    <a href="#verify">11 · Verification</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ============================================================ -->
+<section id="changes">
+  <div class="section-head">
+    <span class="section-num">R</span>
+    <h2>Reviewer comments → resolutions</h2>
+  </div>
+  <p class="lead">
+    Source draft: <a href="https://jeerupraveen04.github.io/PaymentFlowDiagram/donations-pg-mapping-endpoints">Donations — PG Mapping Solution &amp; Action Items</a>
+    (Jeeru Praveen, 11 Nov 2026). The five comments below were raised in the Slack DM on
+    12 Nov 2026, 07:44–07:54 IST. Each one changes the design.
+  </p>
+
+  <div class="card">
+    <div class="comment">
+      <div class="who">Comment 1 · metadata key</div>
+      <blockquote>
+        “The mapping key is (entity_id, pg_id, metadata), and metadata.program_id holds the donation id — that is what makes the same gateway legal per donation.”
+        <br />“It should be <b>metadata.donation_project_id</b>, which will hold the donation project id.”
+      </blockquote>
+      <div class="resolution">
+        <b>Applied.</b> Every occurrence of <code>program_id</code> is replaced with
+        <code>donation_project_id</code>. This is not just a rename: CAPS vendors already use
+        <code>program_id</code> for program flows
+        (<span class="file">caps-be/src/vendors/midtrans/create.ts:59</span>,
+        <span class="file">caps-be/src/vendors/tupaggo/create.ts:41,108,124</span>), so reusing it
+        would collide with program mappings. The value is the donations
+        <code>projects.id</code> (DB) / <code>projectId</code> (API/UI).
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="who">Comment 2 · fetch function name and reuse</div>
+      <blockquote>
+        “customFetchGateway — Why call it customFetchGateway? Why not normal <b>fetchGateways()</b>?”
+        <br />“And we should create a function fetchGateways and then in fact use the same in
+        PaymentGateways component too, instead of duplicating code.”
+      </blockquote>
+      <div class="resolution">
+        <b>Applied.</b> caps-ui gains <code>src/functions/fetchGateways/</code>, exported as
+        <code>fetchGateways()</code>, following the existing <code>checkStatus</code> /
+        <code>refundOrder</code> conventions. <code>PaymentGateways</code> is refactored to call
+        the same function instead of its inline <code>customFetch</code> block.
+        <code>customFetch</code> remains only the low-level HTTP primitive.
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="who">Comment 3 · generic caps-admin endpoint</div>
+      <blockquote>
+        “bx-be-nestjs : pf/caps/payment-gateways/donation-mapping — This should be a
+        <b>generic caps-admin endpoint</b> not necessarily donation specific.
+        Let it accept: 1. country 2. org 3. module 4. metadata (donation will pass here
+        <code>{donation_project_id:xxx}</code>) 5. test.”
+      </blockquote>
+      <div class="resolution">
+        <b>Applied.</b> The endpoint is <code>PUT /pf/caps/payment-gateways/mappings</code>.
+        It has no donation naming or donation-specific DTO fields. The body carries
+        <code>country</code>, <code>org</code>, <code>module</code>, <code>metadata</code>,
+        <code>test</code>, plus the ordered <code>gatewayIds</code> being synced
+        (the “incoming gateway mapping list” from comment 5).
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="who">Comment 4 · no donations-be endpoint</div>
+      <blockquote>
+        “donation-be : donation/gateway-mapping — Again, we don’t need an endpoint for this.
+        They have a single screen in their donations-fe screen which sends a lot of data and the
+        gateway-mapping is a small part of it. We need just a <b>service-method in their related
+        module</b> which will pass along the necessary info to bx-be-nestjs caps-admin generic endpoint.”
+      </blockquote>
+      <div class="resolution">
+        <b>Applied.</b> There is no <code>POST donation/gateway-mapping</code> route and no new
+        donations-be DTO. The gateway selection is already part of the existing Amount-step save
+        (<code>PATCH /projects/:id</code>, <code>amountDetails.pgs</code>). A service method in
+        <code>ProjectPgsService</code> forwards the final saved rows to bx-be-nestjs from the
+        existing save flow.
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="who">Comment 5 · delete and re-insert</div>
+      <blockquote>
+        “the reference implementation is not correct for the bx-be-nestjs endpoint.
+        You also need to <b>delete any existing mapping which matches the full metadata but is
+        not part of incoming gateway mapping list</b>. And existing values also, actually, it is
+        good idea to delete and re-insert. Why? Because it keeps maintaining sort-order in
+        mapping table simple, no?”
+      </blockquote>
+      <div class="resolution">
+        <b>Applied.</b> The sync is a full replacement of one metadata group, not an
+        insert-missing diff. The endpoint deletes every row for the exact
+        <code>(entity_id, metadata)</code> scope and re-inserts the complete incoming list in
+        order. Removals and reordering become free; <code>sort_order</code> is written as
+        <code>1..N</code> (with one schema constraint change — see §6).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="solution">
+  <div class="section-head">
+    <span class="section-num">1</span>
+    <h2>The revised solution</h2>
+  </div>
+
+  <p class="lead">
+    A donation project needs its own payment-gateway set. The same gateway (for example Stripe)
+    can serve many projects, so it must be mapped once per project. The mapping row is scoped by
+    <code>metadata</code>, and the donations-specific key is
+    <code>donation_project_id</code>.
+  </p>
+
+  <div class="card">
+    <div class="kv">
+      <div class="k">Mapping key</div><div><code>(entity_id, pg_id, metadata)</code></div>
+      <div class="k">Donations metadata</div><div><code>{ "donation_project_id": &lt;projects.id&gt; }</code></div>
+      <div class="k">Base / fallback group</div><div>rows with <code>metadata IS NULL</code></div>
+      <div class="k">Entity identity</div><div><code>(module, country, org)</code> in <code>caps.pg_entity</code></div>
+      <div class="k">Donations identity</div><div><code>module = 'DX'</code>, <code>country = project tenant code</code>, <code>org = project organization</code></div>
+      <div class="k">Sync semantics</div><div>replace the exact metadata group (delete + insert all)</div>
+    </div>
+  </div>
+
+  <h3>Three moving parts — and what is deliberately not there</h3>
+  <table>
+    <thead>
+      <tr><th style="width:24%">Part</th><th>What it does</th><th style="width:24%">Repo</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>1. Shared gateway fetch</b></td>
+        <td><code>fetchGateways()</code> returns the validated gateway list for an entity, optionally scoped by metadata. Used by <code>PaymentGateways</code> and by the donations picker.</td>
+        <td>caps-ui</td>
+      </tr>
+      <tr>
+        <td><b>2. Generic mapping sync</b></td>
+        <td><code>PUT /pf/caps/payment-gateways/mappings</code> resolves the entity from <code>(country, org, module)</code>, validates the gateway ids, and replaces the metadata group.</td>
+        <td>bx-be-nestjs</td>
+      </tr>
+      <tr>
+        <td><b>3. Donations service method</b></td>
+        <td><code>ProjectPgsService</code> forwards the already-saved <code>project_pgs</code> rows to the generic endpoint from the existing Amount-step save.</td>
+        <td>donations-be</td>
+      </tr>
+      <tr>
+        <td><span class="pill none">Not added</span></td>
+        <td>No <code>donation/gateway-mapping</code> endpoint in donations-be.</td>
+        <td>donations-be</td>
+      </tr>
+      <tr>
+        <td><span class="pill none">Not added</span></td>
+        <td>No new field in the donations-fe save payload — <code>amountDetails.pgs</code> already exists.</td>
+        <td>donations-fe</td>
+      </tr>
+      <tr>
+        <td><span class="pill none">Not added</span></td>
+        <td>No mapping write path in caps-be. caps-be remains a read-only consumer of <code>vw_pg_mapping</code>.</td>
+        <td>caps-be</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="flow">
+    <div class="lane ui">
+      <div class="who">donations-fe</div>
+      <div class="what">Amount step already sends <b>amountDetails.pgs</b> (pgId, entityId, name, type) in the existing <b>PATCH /projects/:id</b>.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane be">
+      <div class="who">donations-be</div>
+      <div class="what"><b>ProjectPgsService.applyPatchSection</b> persists <b>project_pgs</b>, then <b>syncCapsMappings()</b> forwards the final rows to bx-be-nestjs.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane caps">
+      <div class="who">bx-be-nestjs</div>
+      <div class="what"><b>PUT /pf/caps/payment-gateways/mappings</b> resolves the entity, validates ids, deletes the metadata group, inserts the incoming list 1..N.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane db">
+      <div class="who">caps DB</div>
+      <div class="what"><b>caps.pg_mapping</b> rows with <b>metadata = {donation_project_id}</b>; caps-be reads them through <b>caps.vw_pg_mapping</b>.</div>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <span class="label">Precondition before enabling the sync</span>
+    The donations-fe picker still uses a static list that mirrors the <b>RX UAT</b> gateways with
+    <code>entityId: 1</code> (<span class="file">donations-fe/src/features/newProject/constants/paymentGateways.ts:10-26</span>,
+    TODO <b>PF-17708</b>). Do not enable the CAPS mapping sync while those static rows are in use —
+    it would write donation mappings onto the RX entity. Replace the static list with the real
+    <code>DX</code> gateway list first.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="action1">
+  <div class="section-head">
+    <span class="section-num">2</span>
+    <h2>Action Item 1 — <code>fetchGateways()</code> in caps-ui</h2>
+  </div>
+
+  <p class="lead">
+    The draft proposed a new <code>customFetchGateway</code> that duplicated the only existing
+    gateway fetch. The revised design extracts that fetch once and reuses it.
+  </p>
+
+  <h3>Current state (verified on <code>origin/dev</code>)</h3>
+  <ul>
+    <li><b>Only one gateway fetch exists</b>: the inline block in
+      <span class="file">caps-ui/src/components/PaymentGateways/PaymentGateways.tsx:28-65</span>.</li>
+    <li>There is no <code>fetchGateways</code> and no <code>customFetchGateway</code> in caps-ui today.</li>
+    <li><code>FetchedGateways</code> and <code>validateGateways</code> live in
+      <span class="file">PaymentGateways.types.ts:41-67</span>. A separate helper would either import
+      from the component (wrong dependency direction) or copy the schema.</li>
+    <li><code>customFetch</code> is the low-level primitive in
+      <span class="file">caps-ui/src/utils/customFetch.ts:6-42</span>. It is not the domain function.</li>
+    <li>caps-ui <code>2.5.1</code> is consumed by bx-fe as a pinned tarball
+      (<span class="file">bx-fe/package.json:104</span>); bx-fe has no app-level gateway fetch of its own.</li>
+  </ul>
+
+  <h3>2.1 Folder shape</h3>
+  <p>Follow the existing <code>checkStatus</code> / <code>refundOrder</code> structure exactly:</p>
+  <pre><code><span class="c">// caps-ui/src/functions/fetchGateways/</span>
+<span class="f">fetchGateways.ts</span>          <span class="c">// the function</span>
+<span class="f">fetchGateways.types.ts</span>    <span class="c">// props, result, FetchedGateways schema</span>
+<span class="f">index.ts</span>                  <span class="c">// export * from "./fetchGateways"</span>
+
+<span class="c">// caps-ui/src/functions/index.ts</span>
+export * from <span class="s">"./checkStatus"</span>
+export * from <span class="s">'./refundOrder'</span>
+export * from <span class="s">"./fetchGateways"</span>   <span class="c">// new</span></code></pre>
+
+  <h3>2.2 Types</h3>
+  <p>
+    Move the gateway-list schema next to the function, then have the component import it. This keeps
+    the dependency direction <code>components → functions → utils</code>.
+  </p>
+  <pre><code><span class="c">// caps-ui/src/functions/fetchGateways/fetchGateways.types.ts</span>
+<span class="k">import</span> { z } <span class="k">from</span> <span class="s">"zod"</span>;
+<span class="k">import</span> { CapsEnvironment, CountryCode, CurrencyCode, GatewayMetadata } <span class="k">from</span> <span class="s">"@/types"</span>;
+<span class="k">import</span> { Locale } <span class="k">from</span> <span class="s">"@/utils"</span>;
+
+<span class="k">export type</span> <span class="t">FetchGatewaysProps</span> = {
+  environment: CapsEnvironment;
+  country: CountryCode;
+  currency: CurrencyCode;       <span class="c">// required by caps-be's request schema</span>
+  org: number;
+  module: string;               <span class="c">// e.g. "DX"</span>
+  test: boolean;
+  metadata?: GatewayMetadata;   <span class="c">// donation: { donation_project_id: 1234 }</span>
+  locale?: Locale;
+};
+
+<span class="k">export type</span> <span class="t">FetchGatewaysResult</span> =
+  | { data: FetchedGateways }
+  | { error: string };</code></pre>
+
+  <h3>2.3 The function</h3>
+  <pre><code><span class="c">// caps-ui/src/functions/fetchGateways/fetchGateways.ts</span>
+<span class="k">import</span> { customFetch, getCurrentLocale, setCurrentLocale } <span class="k">from</span> <span class="s">"@/utils"</span>;
+<span class="k">import</span> { validateGateways } <span class="k">from</span> <span class="s">"./fetchGateways.types"</span>;
+<span class="k">import</span> { FetchGatewaysProps, FetchGatewaysResult } <span class="k">from</span> <span class="s">"./fetchGateways.types"</span>;
+
+<span class="k">export const</span> <span class="f">fetchGateways</span> = <span class="k">async</span> ({
+  environment, country, currency, org, module, test, metadata, locale,
+}: <span class="t">FetchGatewaysProps</span>): <span class="t">Promise&lt;FetchGatewaysResult&gt;</span> =&gt; {
+  setCurrentLocale(locale);
+
+  <span class="k">const</span> response = <span class="k">await</span> <span class="f">customFetch</span>(environment, <span class="s">"/fetch-gateways"</span>, <span class="s">"POST"</span>, {
+    country, currency, module, org, test,
+    locale: <span class="f">getCurrentLocale</span>(),
+    metadata,
+  });
+
+  <span class="k">try</span> {
+    <span class="k">const</span> body = <span class="k">await</span> response.<span class="f">json</span>();
+    <span class="k">if</span> (!response.ok) {
+      <span class="k">return</span> { error: body.error ?? <span class="s">"Could not fetch payment gateways from caps-be"</span> };
+    }
+    <span class="k">if</span> (!<span class="f">validateGateways</span>(body.data)) {
+      <span class="k">return</span> { error: <span class="s">"Invalid gateway list response from caps-be"</span> };
+    }
+    <span class="k">return</span> { data: body.data <span class="k">as</span> FetchedGateways };
+  } <span class="k">catch</span> (err) {
+    console.<span class="f">error</span>(<span class="s">"Error while fetching payment gateways:"</span>, err);
+    <span class="k">return</span> { error: <span class="s">"Fetching payment gateways failed due to an unexpected error"</span> };
+  }
+};</code></pre>
+
+  <div class="callout blue">
+    <span class="label">Why this shape</span>
+    <code>checkStatus</code> and <code>refundOrder</code> both call <code>setCurrentLocale()</code>,
+    use <code>customFetch()</code>, and return <code>{ data }</code> / <code>{ error }</code>.
+    <code>fetchGateways</code> matches that contract exactly, so it slots into the package with no
+    new conventions.
+  </div>
+
+  <h3>2.4 Reuse it inside <code>PaymentGateways</code></h3>
+  <p>
+    Replace the inline <code>customFetch</code> block with the shared function. Keep the
+    consumer-specific behavior in the component: the <code>pg_list</code> filter, the gateway
+    count, and the initial selected index.
+  </p>
+  <pre><code><span class="c">// caps-ui/src/components/PaymentGateways/PaymentGateways.tsx</span>
+useEffect(() =&gt; {
+  <span class="f">fetchGateways</span>({
+    environment: config.environment,
+    country: config.country,
+    currency: config.currency,
+    org: config.org,
+    module: config.module,
+    test: config.test,
+    metadata: config.metadata,
+    locale: config.locale,
+  }).<span class="f">then</span>(({ data, error }) =&gt; {
+    <span class="k">if</span> (!data) {
+      console.<span class="f">log</span>(
+        <span class="s">"Something went wrong while fetching payment gateways configured for this entity : "</span>,
+        error,
+      );
+      <span class="k">return</span>;
+    }
+
+    <span class="k">let</span> fetchedList = data;
+    <span class="k">const</span> pgList = (config.metadata <span class="k">as</span> Record&lt;string, unknown&gt; | <span class="k">undefined</span>)?.pg_list;
+    <span class="k">if</span> (Array.<span class="f">isArray</span>(pgList) &amp;&amp; pgList.length &gt; 0) {
+      fetchedList = fetchedList.<span class="f">filter</span>((gateway) =&gt; pgList.<span class="f">includes</span>(gateway.id));
+    }
+
+    <span class="f">setGateways</span>(fetchedList);
+    config.<span class="f">setGatewayCount</span>?.(<span class="c">/* unchanged count logic */</span>);
+    <span class="k">if</span> (selectedGateway === -1) <span class="f">setSelectedGateway</span>(0);
+  });
+}, [<span class="c">/* existing dependencies */</span>]);</code></pre>
+
+  <h3>2.5 Consumers</h3>
+  <table>
+    <thead><tr><th>Repo</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>caps-ui</b></td>
+        <td>Add the function + types, export it, refactor <code>PaymentGateways</code>. Version bump.</td>
+      </tr>
+      <tr>
+        <td><b>bx-fe</b></td>
+        <td>Consumer only (CAPS test-payment page). No application-code change; only the pinned caps-ui tarball/version bump.</td>
+      </tr>
+      <tr>
+        <td><b>donations-fe</b></td>
+        <td>Will consume <code>fetchGateways</code> when the static list is replaced (PF-17708). It does not depend on caps-ui today.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout amber">
+    <span class="label">Fetch semantics warning</span>
+    <code>/fetch-gateways</code> is not an unfiltered gateway catalogue. caps-be requires
+    <code>currency</code>, drops gateways that do not support it, and applies metadata matching
+    whenever any mapping row has metadata. See §9 for the exact behavior and the base-group
+    prerequisite.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="action2">
+  <div class="section-head">
+    <span class="section-num">3</span>
+    <h2>Action Item 2 — generic caps-admin sync endpoint</h2>
+  </div>
+
+  <p class="lead">
+    One endpoint, no donation-specific naming. It accepts an entity identity tuple, a metadata
+    scope, the test flag, and the ordered gateway list. It replaces that metadata group.
+  </p>
+
+  <div class="card">
+    <div class="kv">
+      <div class="k">Route</div><div><code>PUT /pf/caps/payment-gateways/mappings</code></div>
+      <div class="k">Permission</div><div><code>@CanAccess([{ resource: 'PF::common-caps', scope: 'admin' }])</code></div>
+      <div class="k">Owning module</div><div><code>CapsPaymentGatewaysModule</code> (mapping sync belongs with gateway CRUD)</div>
+      <div class="k">Transaction</div><div><code>@Transactional()</code> repository method: delete group → insert list</div>
+      <div class="k">Response</div><div><code>{ entityId, metadata, test, deleted, inserted }</code></div>
+    </div>
+  </div>
+
+  <h3>3.1 Request body</h3>
+  <table>
+    <thead><tr><th style="width:20%">Field</th><th style="width:15%">Type</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>country</code></td><td>string (2)</td><td>Entity country, e.g. <code>IE</code>.</td></tr>
+      <tr><td><code>org</code></td><td>number</td><td>CAPS organization number (part of <code>pg_entity</code>'s unique tuple).</td></tr>
+      <tr><td><code>module</code></td><td>string</td><td>Module code, e.g. <code>DX</code> for donations. Not donation-specific in the endpoint.</td></tr>
+      <tr><td><code>metadata</code></td><td>object</td><td>Exact mapping scope. Donations send <code>{ "donation_project_id": &lt;projects.id&gt; }</code>. Must be a non-empty object.</td></tr>
+      <tr><td><code>test</code></td><td>boolean</td><td>Validate the selected gateways against <code>payment_gateways.test</code>. Not stored on the mapping row.</td></tr>
+      <tr><td><code>gatewayIds</code></td><td>number[]</td><td>The complete ordered list. Position becomes <code>sort_order</code>. Empty array clears the group.</td></tr>
+    </tbody>
+  </table>
+
+  <pre><code>{
+  <span class="s">"country"</span>: <span class="s">"IE"</span>,
+  <span class="s">"org"</span>: 1,
+  <span class="s">"module"</span>: <span class="s">"DX"</span>,
+  <span class="s">"metadata"</span>: { <span class="s">"donation_project_id"</span>: 1127694 },
+  <span class="s">"test"</span>: <span class="k">false</span>,
+  <span class="s">"gatewayIds"</span>: [72, 2]
+}</code></pre>
+
+  <h3>3.2 DTO</h3>
+  <pre><code><span class="c">// bx-be-nestjs/src/modules/pf/caps/payment-gateways/dto/sync-gateway-mappings.dto.ts</span>
+<span class="k">export class</span> <span class="t">SyncGatewayMappingsDto</span> {
+  @<span class="f">ApiProperty</span>({ example: <span class="s">'IE'</span> })
+  @<span class="f">IsString</span>() @<span class="f">Length</span>(2, 2)
+  country!: string;
+
+  @<span class="f">ApiProperty</span>({ example: 1 })
+  @<span class="f">Type</span>(() =&gt; Number) @<span class="f">IsInt</span>()
+  org!: number;
+
+  @<span class="f">ApiProperty</span>({ example: <span class="s">'DX'</span> })
+  @<span class="f">IsString</span>()
+  module!: string;
+
+  @<span class="f">ApiProperty</span>({ example: { donation_project_id: 1127694 } })
+  @<span class="f">IsObject</span>()
+  metadata!: Record&lt;string, unknown&gt;;
+
+  @<span class="f">ApiProperty</span>({ example: <span class="k">false</span> })
+  @<span class="f">IsBoolean</span>()
+  test!: boolean;
+
+  @<span class="f">ApiProperty</span>({ example: [72, 2], type: [Number] })
+  @<span class="f">IsArray</span>()
+  @<span class="f">IsInt</span>({ each: <span class="k">true</span> })
+  @<span class="f">Type</span>(() =&gt; Number)
+  gatewayIds!: number[];
+}</code></pre>
+
+  <div class="callout red">
+    <span class="label">Do not camel-case the metadata keys</span>
+    The existing <code>PUT /pf/caps/entities/:id/config</code> route runs
+    <code>SnakeToCamelMiddleware</code>, which recursively converts nested object keys
+    (<span class="file">bx-be-nestjs/src/_shared/middleware/snake-to-camel.middleware.ts:10-44</span>).
+    If that middleware is applied to this route, <code>donation_project_id</code> arrives as
+    <code>donationProjectId</code> and will never match caps-be's stored key.
+    <b>Do not register the middleware on this route</b>; accept camelCase top-level fields
+    (<code>gatewayIds</code>) and leave <code>metadata</code> untouched. If the admin UI must send
+    snake_case, add an explicit skip for the <code>metadata</code> subtree instead of converting it.
+  </div>
+
+  <h3>3.3 Controller</h3>
+  <pre><code><span class="c">// payment-gateways.controller.ts — literal route, no ':id' conflict (there is no PUT ':id')</span>
+@<span class="f">Put</span>(<span class="s">'mappings'</span>)
+@<span class="f">CanAccess</span>([{ resource: <span class="s">'PF::common-caps'</span>, scope: <span class="s">'admin'</span> }])
+@<span class="f">ApiOperation</span>({ summary: <span class="s">'Replace the gateway mappings for one metadata scope'</span> })
+<span class="f">syncMappings</span>(@<span class="f">Body</span>() dto: SyncGatewayMappingsDto) {
+  <span class="k">return this</span>.service.<span class="f">syncMappings</span>(dto);
+}</code></pre>
+
+  <h3>3.4 Service</h3>
+  <pre><code><span class="c">// payment-gateways.service.ts</span>
+<span class="k">async</span> <span class="f">syncMappings</span>(dto: <span class="t">SyncGatewayMappingsDto</span>) {
+  <span class="k">if</span> (Object.<span class="f">keys</span>(dto.metadata).length === 0) {
+    <span class="k">throw new</span> <span class="t">BadRequestException</span>(<span class="s">'metadata must be a non-empty object'</span>);
+  }
+
+  <span class="k">const</span> entityId = <span class="k">await this</span>.repository.<span class="f">findEntityId</span>(
+    dto.country, dto.org, dto.module,
+  );
+  <span class="k">if</span> (!entityId) {
+    <span class="k">throw new</span> <span class="t">NotFoundException</span>(
+      <span class="s">`CAPS entity not found for ${dto.module}/${dto.country}/${dto.org}`</span>,
+    );
+  }
+
+  <span class="k">const</span> gatewayIds = dto.gatewayIds.<span class="f">map</span>(Number);
+  <span class="k">if</span> (<span class="k">new</span> <span class="t">Set</span>(gatewayIds).size !== gatewayIds.length) {
+    <span class="k">throw new</span> <span class="t">BadRequestException</span>(<span class="s">'gatewayIds contains duplicates'</span>);
+  }
+
+  <span class="k">const</span> validIds = <span class="k">await this</span>.repository.<span class="f">findValidGatewayIds</span>({
+    gatewayIds,
+    test: dto.test,
+  });
+  <span class="k">const</span> invalid = gatewayIds.<span class="f">filter</span>((id) =&gt; !validIds.<span class="f">has</span>(id));
+  <span class="k">if</span> (invalid.length &gt; 0) {
+    <span class="k">throw new</span> <span class="t">BadRequestException</span>(
+      <span class="s">`Unknown, disabled, or test/live-mismatched gateway ids: ${invalid.join(', ')}`</span>,
+    );
+  }
+
+  <span class="k">const</span> result = <span class="k">await this</span>.repository.<span class="f">replaceMetadataGroup</span>({
+    entityId,
+    metadata: dto.metadata,
+    gatewayIds,
+  });
+
+  <span class="k">return</span> {
+    entityId,
+    country: dto.country,
+    org: dto.org,
+    module: dto.module,
+    test: dto.test,
+    metadata: dto.metadata,
+    deleted: result.deleted,
+    inserted: gatewayIds,
+  };
+}</code></pre>
+
+  <h3>3.5 Repository — the delete-and-reinsert</h3>
+  <pre><code><span class="c">// payment-gateways.repository.ts</span>
+<span class="k">async</span> <span class="f">findEntityId</span>(country: string, org: number, module: string) {
+  <span class="k">const</span> [row] = <span class="k">await this</span>.txHost.tx
+    .<span class="f">select</span>({ id: capsPgEntitySchema.id })
+    .<span class="f">from</span>(capsPgEntitySchema)
+    .<span class="f">where</span>(<span class="f">and</span>(
+      <span class="f">eq</span>(capsPgEntitySchema.country, country),
+      <span class="f">eq</span>(capsPgEntitySchema.org, org),
+      <span class="f">eq</span>(capsPgEntitySchema.module, module),
+    ));
+  <span class="k">return</span> row?.id ?? <span class="k">null</span>;
+}
+
+<span class="k">async</span> <span class="f">findValidGatewayIds</span>(params: { gatewayIds: number[]; test: boolean }) {
+  <span class="k">if</span> (params.gatewayIds.length === 0) <span class="k">return new</span> <span class="t">Set</span>&lt;number&gt;();
+  <span class="k">const</span> rows = <span class="k">await this</span>.txHost.tx
+    .<span class="f">select</span>({ id: paymentGatewaysInCaps.id })
+    .<span class="f">from</span>(paymentGatewaysInCaps)
+    .<span class="f">where</span>(<span class="f">and</span>(
+      <span class="f">inArray</span>(paymentGatewaysInCaps.id, params.gatewayIds),
+      <span class="f">eq</span>(paymentGatewaysInCaps.test, params.test),
+      <span class="f">eq</span>(paymentGatewaysInCaps.enabled, <span class="k">true</span>),
+    ));
+  <span class="k">return new</span> <span class="t">Set</span>(rows.<span class="f">map</span>((r) =&gt; Number(r.id)));
+}
+
+@<span class="f">Transactional</span>()
+<span class="k">async</span> <span class="f">replaceMetadataGroup</span>(params: {
+  entityId: number;
+  metadata: Record&lt;string, unknown&gt;;
+  gatewayIds: number[];
+}) {
+  <span class="k">const</span> { entityId, metadata, gatewayIds } = params;
+
+  <span class="c">// 1. Delete exactly this metadata group — not the NULL/base group, not a subset.</span>
+  <span class="k">const</span> deleted = <span class="k">await this</span>.txHost.tx
+    .<span class="f">delete</span>(capsPgMappingSchema)
+    .<span class="f">where</span>(<span class="f">and</span>(
+      <span class="f">eq</span>(capsPgMappingSchema.entityId, entityId),
+      sql`${capsPgMappingSchema.metadata} = ${JSON.stringify(metadata)}::jsonb`,
+    ))
+    .<span class="f">returning</span>({ id: capsPgMappingSchema.id });
+
+  <span class="c">// 2. Insert the complete incoming list in order.</span>
+  <span class="k">if</span> (gatewayIds.length &gt; 0) {
+    <span class="k">await this</span>.txHost.tx.<span class="f">insert</span>(capsPgMappingSchema).<span class="f">values</span>(
+      gatewayIds.<span class="f">map</span>((pgId, index) =&gt; ({
+        entityId,
+        pgId,
+        sortOrder: index + 1,
+        metadata,
+      })),
+    );
+  }
+
+  <span class="k">this</span>.auditLogger.<span class="f">info</span>(<span class="s">'CAPS gateway mapping group replaced'</span>, {
+    event_action: <span class="s">'update'</span>,
+    event_type: <span class="s">'entity_config'</span>,
+    event_id: entityId,
+    data: { metadata, gatewayIds, deleted: deleted.length },
+  });
+
+  <span class="k">return</span> { deleted: deleted.length };
+}</code></pre>
+
+  <div class="callout amber">
+    <span class="label">Companion changes required for safety</span>
+    Once metadata groups exist, the existing caps-admin entity screen must stop touching them:
+    <ul style="margin:6px 0 0 18px; padding:0;">
+      <li><code>saveConfig</code> must delete only <code>metadata IS NULL</code> rows
+        (<span class="file">entities.repository.ts:136-153</span> currently deletes <b>all</b> rows for the entity).</li>
+      <li><code>findMappings</code> must return only <code>metadata IS NULL</code> rows
+        (<span class="file">entities.repository.ts:106-118</span> currently returns only <code>pgId</code>
+        for every row, so the UI cannot tell groups apart and would rewrite them as base rows).</li>
+    </ul>
+    Without these two fixes, the next caps-admin save silently wipes the donation mappings.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="action3">
+  <div class="section-head">
+    <span class="section-num">4</span>
+    <h2>Action Item 3 — donations-be service method (no endpoint)</h2>
+  </div>
+
+  <p class="lead">
+    donations-fe already sends the gateway selection as part of the Amount step. donations-be
+    already persists it. The only missing piece is a service method that forwards the final rows
+    to the generic endpoint after the existing save.
+  </p>
+
+  <h3>4.1 The existing flow (verified)</h3>
+  <div class="flow">
+    <div class="lane ui">
+      <div class="who">donations-fe</div>
+      <div class="what"><b>PATCH /projects/:id</b> with <b>step: "amount"</b> and <b>amountDetails.pgs</b>
+        (<span class="file">newProjectPayloadService.ts:300-345</span>). Each row carries
+        <b>pgId, entityId, name, type, username, description</b>; no new field needed.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane be">
+      <div class="who">donations-be</div>
+      <div class="what"><b>ProjectsService.applyProjectUpdate</b> → <b>ProjectPgsService.applyPatchSection</b>
+        writes <b>project_pgs</b> with a 0-based <b>display_order</b>
+        (<span class="file">project-pgs.service.ts:97-180</span>, call site
+        <span class="file">projects.service.ts:759-783</span>).</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane be">
+      <div class="who">donations-be</div>
+      <div class="what"><span class="pill add">New</span> <b>ProjectPgsService.syncCapsMappings()</b> reads the final
+        project_pgs rows and calls bx-be-nestjs once per entity.</div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <span class="label">No new API surface</span>
+    No <code>donation/gateway-mapping</code> controller, no new donations DTO, no new donations-fe
+    payload field. The project screen keeps sending one payload; the gateway mapping is a
+    server-side side effect of the Amount-step save it already performs.
+  </div>
+
+  <h3>4.2 The service method</h3>
+  <pre><code><span class="c">// donations-be/src/modules/projects/pgs/project-pgs.service.ts</span>
+<span class="k">public async</span> <span class="f">syncCapsMappings</span>(params: {
+  projectId: number;
+  organizationId: number;
+  pgs: ProjectPgsSchemaSelect[];
+  token: string;
+  tenantCode: string;
+}): <span class="t">Promise&lt;void&gt;</span> {
+  <span class="c">// One call per entity; project_pgs rows are already saved.</span>
+  <span class="k">const</span> byEntity = <span class="k">new</span> <span class="t">Map</span>&lt;number, ProjectPgsSchemaSelect[]&gt;();
+  <span class="k">for</span> (<span class="k">const</span> pg <span class="k">of</span> params.pgs) {
+    <span class="k">if</span> (!pg.entityId || !pg.pgId) <span class="k">continue</span>;   <span class="c">// entityId is nullable today</span>
+    <span class="k">const</span> rows = byEntity.<span class="f">get</span>(pg.entityId) ?? [];
+    rows.<span class="f">push</span>(pg);
+    byEntity.<span class="f">set</span>(pg.entityId, rows);
+  }
+
+  <span class="k">for</span> (<span class="k">const</span> rows <span class="k">of</span> byEntity.<span class="f">values</span>()) {
+    <span class="k">await this</span>.capsAdminClient.<span class="f">syncGatewayMappings</span>({
+      token: params.token,
+      tenantCode: params.tenantCode,
+      body: {
+        country: params.tenantCode,          <span class="c">// tenant code is the 2-char country code</span>
+        org: params.organizationId,
+        module: <span class="s">'DX'</span>,
+        test: env.CAPS_TEST_MODE,
+        metadata: { donation_project_id: params.projectId },
+        gatewayIds: rows
+          .<span class="f">sort</span>((a, b) =&gt; a.displayOrder - b.displayOrder)
+          .<span class="f">map</span>((pg) =&gt; Number(pg.pgId)),
+      },
+    });
+  }
+}</code></pre>
+
+  <h3>4.3 Call it after the transaction commits</h3>
+  <pre><code><span class="c">// donations-be/src/modules/projects/projects.service.ts — updateProject()</span>
+<span class="k">const</span> updated = <span class="k">await this</span>.<span class="f">applyProjectUpdate</span>(id, input, caller);
+
+<span class="k">if</span> (input.step === <span class="t">ProjectWizardStep</span>.AMOUNT) {
+  <span class="k">const</span> tenant = <span class="k">this</span>.cls.<span class="f">get</span>&lt;{ code: string }&gt;(<span class="s">'tenant'</span>);   <span class="c">// resolved by TenantResolutionGuard</span>
+  <span class="k">await this</span>.projectPgsService.<span class="f">syncCapsMappings</span>({
+    projectId: id,
+    organizationId: updated.organizationId,
+    pgs: updated.pgs,
+    token: caller.token,
+    tenantCode: tenant.code,
+  }).<span class="f">catch</span>((err) =&gt; {
+    <span class="c">// The project save already committed. Fail open with a structured log;</span>
+    <span class="c">// mapping drift is repaired by a retry/outbox follow-up.</span>
+    <span class="k">this</span>.logger.<span class="f">error</span>(<span class="s">'CAPS mapping sync failed after project save'</span>, {
+      projectId: id, err,
+    });
+  });
+}</code></pre>
+
+  <div class="callout blue">
+    <span class="label">Why after the transaction</span>
+    <code>applyProjectUpdate</code> is <code>@Transactional</code>
+    (<span class="file">projects.service.ts:624</span>). Running the bx HTTP call inside it would hold
+    a DB transaction open across the network. The sync runs after commit; a bx failure does not
+    roll back the project. Treat the mapping sync as eventually consistent and schedule a retry
+    (outbox/queue) if the first call fails.
+  </div>
+
+  <h3>4.4 The bx client</h3>
+  <p>
+    donations-be has no <code>@nestjs/axios</code>; both existing clients use native
+    <code>fetch</code>. Extend <code>_shared/bx</code> with a small client, reusing the existing
+    <code>BX_BE_BASE_URL</code> (already validated in
+    <span class="file">src/config/env.ts:122-125</span>) and the caller's Keycloak token.
+  </p>
+  <pre><code><span class="c">// donations-be/src/_shared/bx/bx-caps-admin.client.ts</span>
+@<span class="f">Injectable</span>()
+<span class="k">export class</span> <span class="t">BxCapsAdminClient</span> {
+  <span class="k">private readonly</span> timeoutMs = 5000;
+
+  <span class="k">public async</span> <span class="f">syncGatewayMappings</span>(params: {
+    token: string;
+    tenantCode: string;
+    body: {
+      country: string; org: number; module: string; test: boolean;
+      metadata: Record&lt;string, unknown&gt;; gatewayIds: number[];
+    };
+  }) {
+    <span class="k">const</span> url = <span class="k">new</span> <span class="t">URL</span>(
+      <span class="s">`${env.BX_BE_BASE_URL}/pf/caps/payment-gateways/mappings`</span>,
+    );
+    <span class="k">const</span> response = <span class="k">await</span> <span class="f">fetch</span>(url, {
+      method: <span class="s">'PUT'</span>,
+      headers: {
+        <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>,
+        Authorization: <span class="s">`Bearer ${params.token}`</span>,
+        <span class="s">'x-tenant-code'</span>: params.tenantCode,
+      },
+      body: <span class="f">JSON.stringify</span>(params.body),
+      signal: <span class="t">AbortSignal</span>.<span class="f">timeout</span>(<span class="k">this</span>.timeoutMs),
+    });
+
+    <span class="k">if</span> (response.status === 401) <span class="k">throw new</span> <span class="t">UnauthorizedException</span>();
+    <span class="k">if</span> (response.status === 403) <span class="k">throw new</span> <span class="t">ForbiddenException</span>();
+    <span class="k">if</span> (!response.ok) {
+      <span class="k">throw new</span> <span class="t">ServiceUnavailableException</span>(<span class="s">'CAPS admin mapping sync failed'</span>);
+    }
+    <span class="k">return</span> response.<span class="f">json</span>();
+  }
+}</code></pre>
+
+  <ul>
+    <li>Add the client to <code>BxModule</code> providers/exports and import <code>BxModule</code> into <code>ProjectsModule</code>.</li>
+    <li><code>TenantGuard</code> on bx-be-nestjs requires <code>x-tenant-code</code>; the donations tenant code is already sent as that header by the existing access client.</li>
+    <li>The caller's token must reach the service. Either pass it from the controller
+      (<code>ProjectsController.update</code> already has the request available via <code>getCaller</code>) or store it in CLS from the auth guard. Do not invent a service account for this call.</li>
+  </ul>
+
+  <h3>4.5 Identity mapping</h3>
+  <table>
+    <thead><tr><th style="width:22%">Endpoint field</th><th>Donations source</th></tr></thead>
+    <tbody>
+      <tr><td><code>country</code></td><td>Project tenant code (2-char country code, e.g. <code>IE</code>).</td></tr>
+      <tr><td><code>org</code></td><td>Project <code>organizationId</code> (verify it equals the CAPS org number for the DX entity).</td></tr>
+      <tr><td><code>module</code></td><td>Constant <code>'DX'</code> (the donations module; see PF-17708).</td></tr>
+      <tr><td><code>metadata</code></td><td><code>{ donation_project_id: projectId }</code>.</td></tr>
+      <tr><td><code>test</code></td><td><code>env.CAPS_TEST_MODE</code> — true in dev/QA, false in production. Must match the flag used to fetch the gateway list in donations-fe.</td></tr>
+      <tr><td><code>gatewayIds</code></td><td><code>project_pgs</code> ordered by <code>display_order</code>; <code>sort_order</code> becomes <code>display_order + 1</code> inside the endpoint's array order.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout amber">
+    <span class="label">Edge cases to handle</span>
+    <ul style="margin:6px 0 0 18px; padding:0;">
+      <li><b>All gateways removed</b> — still call the sync with <code>gatewayIds: []</code>, so the group is deleted.</li>
+      <li><b>Organization changed</b> — the existing PROJECT_DETAILS branch deletes <code>project_pgs</code>. Sync an empty list against the old entity (or let a follow-up cleanup remove it) so the old mapping group does not linger.</li>
+      <li><b>Missing <code>entityId</code></b> — the column is nullable. Skip with a warning; enforce it in FE validation when the real DX list lands.</li>
+      <li><b>Entity mismatch</b> — if the resolved entity is not the one stored on the selected rows (today's static RX rows), do not write. Validate before enabling the feature.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sync">
+  <div class="section-head">
+    <span class="section-num">5</span>
+    <h2>The sync logic — delete the group, re-insert everything</h2>
+  </div>
+
+  <p class="lead">
+    The draft's insert-missing-only logic cannot remove a gateway the admin deselected, and it
+    needed extra diffing to keep sort order. The revised logic replaces the group atomically.
+  </p>
+
+  <ol class="steps">
+    <li><b>Resolve the entity.</b> Look up <code>caps.pg_entity</code> by <code>(country, org, module)</code>. No entity → 404. Do not auto-create on a sync.</li>
+    <li><b>Validate the incoming list.</b> Reject duplicates. Every id must exist in <code>caps.payment_gateways</code>, be enabled, and have <code>test = dto.test</code>. Invalid ids → 400, before anything is deleted.</li>
+    <li><b>Delete the exact metadata group.</b> <code>DELETE ... WHERE entity_id = :eid AND metadata = :metadata::jsonb</code>. Exact JSONB equality — not a subset, not the NULL group.</li>
+    <li><b>Insert the complete incoming list.</b> One row per gateway, <code>sort_order = 1..N</code> in array order, same <code>metadata</code> object.</li>
+    <li><b>Return the result.</b> <code>{ entityId, metadata, test, deleted, inserted }</code>. An empty incoming list is valid and just clears the group.</li>
+    <li><b>Audit.</b> Log the metadata scope, the full gateway id list, and the deleted count.</li>
+  </ol>
+
+  <h3>5.1 Insert-missing vs full replacement</h3>
+  <table>
+    <thead>
+      <tr><th>Case</th><th>Draft (insert missing only)</th><th>Revised (delete + insert all)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Add a gateway</td><td>Insert one row</td><td>Group replaced; row present</td></tr>
+      <tr><td>Remove a gateway</td><td><b>Stale row remains</b></td><td>Row gone</td></tr>
+      <tr><td>Reorder gateways</td><td>Sort order not updated</td><td>Re-inserted in new order</td></tr>
+      <tr><td>Re-run with the same list</td><td>No-op</td><td>Same content; row ids change; <code>vendor_history</code> dedupes</td></tr>
+      <tr><td>Select-all-then-clear</td><td>Cannot clear</td><td><code>gatewayIds: []</code> clears the group</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Edge cases</h3>
+  <ul>
+    <li><b>Exact metadata scope.</b> The delete matches the full object, e.g. only rows whose metadata is exactly <code>{"donation_project_id":1127694}</code>. Other projects and the base group are untouched.</li>
+    <li><b>NULL group.</b> This endpoint never deletes <code>metadata IS NULL</code> rows. The caps-admin entity screen owns the base group.</li>
+    <li><b>Empty metadata object.</b> Rejected. caps-be treats <code>{}</code> as matching every checkout (an empty object passes the <code>every()</code> check), which would suppress the NULL fallback. See §9.</li>
+    <li><b>Duplicates.</b> Rejected before delete, so a bad payload cannot wipe the group.</li>
+    <li><b>Concurrent syncs.</b> Both run in transactions; the unique key serializes conflicting inserts. If two saves race, the later transaction wins and the earlier one may roll back on the constraint — acceptable for an admin screen, but wrap the call with the repo's PG error handling and retry once.</li>
+  </ul>
+
+  <div class="callout green">
+    <span class="label">Idempotency</span>
+    Re-running the same list leaves the same logical content. Row ids change because of the
+    delete/re-insert, but the mapping key <code>(entity_id, pg_id, metadata)</code> and the
+    sort order are identical. <code>caps.update_vendor_history()</code> is
+    <code>AFTER INSERT</code> with <code>ON CONFLICT DO NOTHING</code>, so the re-inserts do not
+    duplicate vendor history.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sort">
+  <div class="section-head">
+    <span class="section-num">6</span>
+    <h2>Sort order and the one schema constraint that matters</h2>
+  </div>
+
+  <p class="lead">
+    The reviewer's “delete and re-insert keeps sort order simple” is the right model, but the
+    current schema has a global unique key that prevents two metadata groups from both using
+    <code>1..N</code>. This is the one migration the revised design needs.
+  </p>
+
+  <h3>6.1 Current constraints (verified)</h3>
+  <table>
+    <thead><tr><th>Constraint</th><th>Definition</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>pg_mapping_entity_id_sort_order_key</code></td>
+        <td><code>UNIQUE (entity_id, sort_order)</code></td>
+        <td><b>Global per entity.</b> All metadata groups compete for the same numbers.</td>
+      </tr>
+      <tr>
+        <td><code>pg_mapping_entity_id_pg_id_key</code></td>
+        <td><code>UNIQUE (entity_id, pg_id, metadata)</code></td>
+        <td>Allows the same gateway for different projects. NULL metadata is treated as distinct (Postgres default), so duplicate NULL rows are technically possible.</td>
+      </tr>
+      <tr>
+        <td><code>pg_mapping_sort_order_check</code></td>
+        <td><code>CHECK (sort_order &gt; 0)</code></td>
+        <td>Positions start at 1.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 Recommended migration — per-group sort order</h3>
+  <pre><code><span class="c">-- caps schema migration (source of truth: bx-be/db/migrations)</span>
+ALTER TABLE caps.pg_mapping
+  DROP CONSTRAINT pg_mapping_entity_id_sort_order_key;
+
+ALTER TABLE caps.pg_mapping
+  ADD CONSTRAINT pg_mapping_entity_id_metadata_sort_order_key
+  UNIQUE (entity_id, metadata, sort_order) NULLS NOT DISTINCT;</code></pre>
+
+  <p class="small muted">
+    <code>NULLS NOT DISTINCT</code> requires PostgreSQL 15+. The bx database is on PG 15.8, so this
+    is available. It makes the NULL/base group behave as one group instead of many distinct rows.
+  </p>
+
+  <h3>6.3 Fallback if the migration is not approved</h3>
+  <p>
+    Keep the global key and compute an offset after deleting the group:
+  </p>
+  <pre><code><span class="c">-- after DELETE of this metadata group</span>
+<span class="k">SELECT</span> coalesce(<span class="f">max</span>(sort_order), 0) <span class="k">FROM</span> caps.pg_mapping
+<span class="k">WHERE</span> entity_id = $1;
+
+<span class="c">-- insert the incoming list with sort_order = offset + 1 .. offset + N</span></code></pre>
+  <p class="small muted">
+    This preserves the relative order inside the group (caps-be sorts all entity rows then filters
+    by metadata), but the numbers are no longer <code>1..N</code> per project. The migration is the
+    cleaner long-term shape.
+  </p>
+
+  <h3>6.4 Do not “harden” metadata to <code>'{}'</code></h3>
+  <div class="callout red">
+    <span class="label">Correction to the source draft</span>
+    The draft suggested <code>metadata NOT NULL DEFAULT '{}'::jsonb</code>. <b>Do not do that.</b>
+    caps-be treats an empty metadata object as matching every checkout
+    (<code>Object.keys({}).every(...)</code> is vacuously true), so an empty object silently
+    becomes a global mapping and suppresses the NULL fallback. Keep <code>metadata</code> nullable:
+    SQL NULL is the base group; a non-empty object is a scoped group. If you want to close the
+    NULL-distinct hole, use <code>UNIQUE ... NULLS NOT DISTINCT</code> instead of a default value.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="flow">
+  <div class="section-head">
+    <span class="section-num">7</span>
+    <h2>End-to-end flow</h2>
+  </div>
+
+  <div class="flow">
+    <div class="lane ui">
+      <div class="who">1 · donations-fe</div>
+      <div class="what">Admin opens the project, Amount step. The picker is already on the screen
+        (<span class="file">AmountStep.tsx:205</span> → <span class="file">PaymentGatewayField.tsx:64</span>).
+        Once PF-17708 lands, options come from caps-ui <b>fetchGateways()</b> instead of the static list.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane ui">
+      <div class="who">2 · donations-fe</div>
+      <div class="what">Save sends the existing <b>PATCH /projects/:id</b> with
+        <b>amountDetails.pgs</b> in the form order. No new endpoint, no new payload field.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane be">
+      <div class="who">3 · donations-be</div>
+      <div class="what"><b>ProjectsService.applyProjectUpdate</b> commits the project and
+        <b>project_pgs</b> rows in one transaction.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane be">
+      <div class="who">4 · donations-be</div>
+      <div class="what"><b>ProjectPgsService.syncCapsMappings()</b> maps the saved rows to
+        <b>gatewayIds</b> ordered by <b>display_order</b>, adds
+        <b>metadata = { donation_project_id }</b>, and calls bx-be-nestjs with the caller token.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane caps">
+      <div class="who">5 · bx-be-nestjs</div>
+      <div class="what"><b>PUT /pf/caps/payment-gateways/mappings</b> resolves the entity from
+        <b>(country, org, module)</b>, validates the ids against <b>payment_gateways.test/enabled</b>,
+        and opens one transaction.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane caps">
+      <div class="who">6 · bx-be-nestjs</div>
+      <div class="what">Delete rows for <b>(entity_id, metadata)</b>; insert the incoming list with
+        <b>sort_order 1..N</b>; audit log; return the summary.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane db">
+      <div class="who">7 · caps DB</div>
+      <div class="what"><b>caps.pg_mapping</b> now holds exactly the selected gateways for this
+        donation project's metadata group.</div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="lane caps">
+      <div class="who">8 · caps-be</div>
+      <div class="what">On the next gateway-list fetch, <b>fetchGateways</b> reads
+        <b>vw_pg_mapping</b>, matches rows by <b>metadata ⊆ incoming</b>, and falls back to
+        <b>metadata IS NULL</b> when nothing matches.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="files">
+  <div class="section-head">
+    <span class="section-num">8</span>
+    <h2>File changes by repo</h2>
+  </div>
+
+  <h3>8.1 caps-ui</h3>
+  <table>
+    <thead><tr><th style="width:12%">Action</th><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill add">Add</span></td><td><code>src/functions/fetchGateways/fetchGateways.ts</code></td><td>Shared fetch implementation.</td></tr>
+      <tr><td><span class="pill add">Add</span></td><td><code>src/functions/fetchGateways/fetchGateways.types.ts</code></td><td>Props, result union, <code>FetchedGateways</code> schema/validator.</td></tr>
+      <tr><td><span class="pill add">Add</span></td><td><code>src/functions/fetchGateways/index.ts</code></td><td>Folder barrel.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/functions/index.ts</code></td><td>Export the new function.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/components/PaymentGateways/PaymentGateways.tsx</code></td><td>Replace the inline fetch with <code>fetchGateways()</code>; keep <code>pg_list</code>/count/selection logic.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/components/PaymentGateways/PaymentGateways.types.ts</code></td><td>Import/re-export the moved schema and type.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>package.json</code></td><td>Version bump and tarball for consumers.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 bx-be-nestjs</h3>
+  <table>
+    <thead><tr><th style="width:12%">Action</th><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill add">Add</span></td><td><code>src/modules/pf/caps/payment-gateways/dto/sync-gateway-mappings.dto.ts</code></td><td>Generic DTO: country, org, module, metadata, test, gatewayIds.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>.../payment-gateways.controller.ts</code></td><td><code>PUT mappings</code> route, <code>PF::common-caps:admin</code>.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>.../payment-gateways.service.ts</code></td><td><code>syncMappings()</code> — resolve, validate, replace.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>.../payment-gateways.repository.ts</code></td><td><code>findEntityId</code>, <code>findValidGatewayIds</code>, <code>replaceMetadataGroup</code> (transactional).</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/modules/pf/caps/entities/entities.repository.ts</code></td><td>Scope <code>saveConfig</code> delete and <code>findMappings</code> read to <code>metadata IS NULL</code>.</td></tr>
+      <tr><td><span class="pill add">Add</span></td><td><code>supabase/migrations/&lt;ts&gt;_caps_pg_mapping_metadata_sort_order.sql</code></td><td>Per-group unique key (<code>NULLS NOT DISTINCT</code>), optional NULL hardening for <code>(entity_id, pg_id, metadata)</code>.</td></tr>
+      <tr><td><span class="pill add">Add</span></td><td>Unit/e2e tests</td><td>Create/replace/clear, other groups untouched, invalid ids, entity 404, metadata key preserved.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.3 donations-be</h3>
+  <table>
+    <thead><tr><th style="width:12%">Action</th><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill add">Add</span></td><td><code>src/_shared/bx/bx-caps-admin.client.ts</code></td><td>PUT client for the generic endpoint; native <code>fetch</code>, timeout, 401/403/5xx mapping.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/_shared/bx/bx.module.ts</code></td><td>Provide/export the new client.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/modules/projects/projects.module.ts</code></td><td>Import <code>BxModule</code>.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/modules/projects/pgs/project-pgs.service.ts</code></td><td><code>syncCapsMappings()</code>.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/modules/projects/projects.service.ts</code></td><td>Call the sync after the Amount-step transaction; org-change cleanup.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/modules/projects/projects.controller.ts</code></td><td>Pass the caller token to the service.</td></tr>
+      <tr><td><span class="pill mod">Modify</span></td><td><code>src/config/env.ts</code> + <code>.registered-secrets.json</code></td><td>Add <code>CAPS_TEST_MODE</code>; reuse <code>BX_BE_BASE_URL</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.4 donations-fe</h3>
+  <table>
+    <thead><tr><th style="width:12%">Action</th><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill none">None</span></td><td><code>newProjectPayloadService.ts</code>, <code>newProject.types.ts</code></td><td>The selection is already sent as <code>amountDetails.pgs</code>. No new field.</td></tr>
+      <tr><td><span class="pill mod">Later</span></td><td><code>src/features/newProject/constants/paymentGateways.ts</code></td><td>PF-17708: replace the static RX UAT list with the real <code>DX</code> list.</td></tr>
+      <tr><td><span class="pill mod">Later</span></td><td><code>PaymentGatewayField.tsx</code></td><td>Consume <code>fetchGateways()</code> from caps-ui once the dependency is added.</td></tr>
+      <tr><td><span class="pill mod">Later</span></td><td><code>package.json</code></td><td>Add caps-ui when the picker moves off the static list.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.5 caps-be and bx-fe</h3>
+  <table>
+    <thead><tr><th style="width:12%">Repo</th><th style="width:12%">Action</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><b>caps-be</b></td><td><span class="pill none">No change</span></td><td>It already reads <code>vw_pg_mapping</code> and matches metadata (<span class="file">src/db/rpc.ts:79-101</span>). No write path is added.</td></tr>
+      <tr><td><b>bx-fe</b></td><td><span class="pill none">No app change</span></td><td>It only consumes caps-ui's <code>PaymentGateways</code> on the CAPS test-payment page. A caps-ui version bump is the only dependency action.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section id="matching">
+  <div class="section-head">
+    <span class="section-num">9</span>
+    <h2>How CAPS matches metadata (verified)</h2>
+  </div>
+
+  <p class="lead">
+    The revised design depends on caps-be's existing matching semantics. These are the exact rules
+    in <span class="file">caps-be/src/db/rpc.ts:79-101</span>.
+  </p>
+
+  <div class="card">
+    <ol style="margin:0 0 0 18px; padding:0;">
+      <li>Load all rows for the entity, <code>test</code> mode, and <code>enabled = true</code>, ordered by <code>sort_order</code>.</li>
+      <li>If <b>no</b> row has non-null metadata, return all rows (base mode).</li>
+      <li>If any row has metadata, a row matches when <b>every key in the row's metadata</b> equals the incoming value with strict <code>===</code>. The incoming object may carry extra keys (subset match).</li>
+      <li>If at least one row matches, return only the matched rows. NULL-metadata rows are <b>not</b> added.</li>
+      <li>If nothing matches, fall back to rows with <code>metadata IS NULL</code>.</li>
+      <li>Append the synthetic <code>paylater</code> row afterwards.</li>
+    </ol>
+  </div>
+
+  <div class="callout amber">
+    <span class="label">Base group prerequisite</span>
+    For the donation picker to offer the full menu, the <code>DX</code> entity should keep a
+    <b><code>metadata IS NULL</code> base group</b> listing the gateways selectable for donations.
+    A project-specific group then overrides it. Without a base group, once the first project group
+    exists, <code>/fetch-gateways</code> for a new project matches nothing and falls back to an
+    empty NULL set — leaving only <code>paylater</code>.
+  </div>
+
+  <h3>9.1 What the fetch does not do</h3>
+  <ul>
+    <li><b>It is not an unfiltered catalogue.</b> <code>currency</code> is required and gateways that do not support it are dropped.</li>
+    <li><b>It does not return <code>metadata</code>.</b> A client cannot tell which group produced a gateway.</li>
+    <li><b><code>pg_list</code> is a caps-ui-side filter only.</b> caps-be ignores it unless it is stored in a mapping row's metadata.</li>
+    <li><b><code>/create-order</code> does not re-validate the mapping.</b> Once the client picks a <code>pgId</code>, caps-be looks the gateway up by id and trusts it; metadata matching happens at list time, not order time.</li>
+  </ul>
+
+  <div class="callout red">
+    <span class="label">Strict equality, not JSONB semantics</span>
+    <code>dbMeta[key] === incomingMeta[key]</code> is JavaScript strict equality. Numbers and strings
+    do not match (<code>1</code> vs <code>"1"</code>), and arrays/nested objects never match because
+    the JSON-decoded references differ. <code>donation_project_id</code> must be a JSON number on
+    both sides — which it is when both the stored metadata and the fetch metadata come from the
+    same <code>projects.id</code> number.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="reality">
+  <div class="section-head">
+    <span class="section-num">10</span>
+    <h2>Reality checks and open items found on <code>origin/dev</code></h2>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:5%">#</th><th style="width:38%">Finding</th><th>Consequence / action</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>No donation mapping code, no <code>program_id</code>, no <code>donation_project_id</code> exists in bx-be-nestjs, caps-be, donations-be, or donations-fe today.</td><td>This is a greenfield write path. The doc's endpoint and service method are new code, not a modification of an existing donation flow.</td></tr>
+      <tr><td>2</td><td>bx-be-nestjs has no metadata writer. <code>MappingItem</code> has only <code>pgId</code>/<code>sortOrder</code>, and <code>saveConfig</code> writes only those.</td><td>The new endpoint is the first metadata writer. It cannot reuse the entity-config DTO unchanged.</td></tr>
+      <tr><td>3</td><td><code>saveConfig</code> deletes <b>all</b> mappings for the entity; <code>findMappings</code> returns only <code>pgId</code>.</td><td>Both must be scoped to <code>metadata IS NULL</code> before metadata groups exist, or the caps-admin screen wipes them.</td></tr>
+      <tr><td>4</td><td><code>SnakeToCamelMiddleware</code> recursively rewrites nested keys on the config route.</td><td>Do not apply it to the new route; otherwise <code>donation_project_id</code> becomes <code>donationProjectId</code> and matching fails.</td></tr>
+      <tr><td>5</td><td><code>test</code> is not a column on <code>caps.pg_mapping</code>; it lives on <code>caps.payment_gateways</code>.</td><td>The endpoint accepts <code>test</code> for validation only and never persists it on the mapping row.</td></tr>
+      <tr><td>6</td><td><code>UNIQUE (entity_id, sort_order)</code> is global per entity.</td><td>Per-group <code>1..N</code> needs the migration in §6.2, or the offset fallback in §6.3.</td></tr>
+      <tr><td>7</td><td>donations-fe still ships a static RX UAT gateway list with <code>entityId: 1</code> (TODO PF-17708), and does not depend on caps-ui.</td><td>Do not enable the sync before the real <code>DX</code> list lands. Adding caps-ui to donations-fe is a separate dependency change.</td></tr>
+      <tr><td>8</td><td><code>project_pgs.entity_id</code> is nullable; <code>PgItemDto.entityId</code> is optional; FE validation leaves it optional.</td><td>Require it for the sync; skip/log rows without it until validation is tightened.</td></tr>
+      <tr><td>9</td><td>donations-be's <code>BxAuthClient</code> is GET-only and services do not receive the caller token today.</td><td>Add the PUT client and plumb the token from the controller (or CLS) as part of this work.</td></tr>
+      <tr><td>10</td><td><code>program_id</code> is already consumed by CAPS program vendors (midtrans, tupaggo).</td><td>This is why <code>donation_project_id</code> is the correct distinct key, not a cosmetic rename.</td></tr>
+      <tr><td>11</td><td><code>/fetch-gateways</code> applies metadata filtering and is not a flat catalogue.</td><td>Use the base NULL group as the donation menu, and fetch with <code>{donation_project_id}</code> for a project's effective set.</td></tr>
+      <tr><td>12</td><td>No GIN index on <code>metadata</code>; caps-be loads all entity rows then filters in Node.</td><td>One row per project grows the scan linearly. Acceptable for now; consider a GIN index if the entity has many projects.</td></tr>
+      <tr><td>13</td><td><code>vendor_history</code> is <code>AFTER INSERT</code> only and has no metadata dimension.</td><td>Deleting a mapping does not remove its vendor type from <code>/fetch-vendors</code>. Harmless for dedupe, but the vendor list can be broader than the current mappings.</td></tr>
+      <tr><td>14</td><td>Audit logging on mapping changes is thin (entity id only).</td><td>Log the metadata scope, gateway ids, and deleted count so the replacement is reconstructible.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section id="verify">
+  <div class="section-head">
+    <span class="section-num">11</span>
+    <h2>Verification checklist</h2>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">caps-ui</h3>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li><code>fetchGateways</code> returns <code>{ data }</code> on 200 and <code>{ error }</code> on non-OK/invalid data.</li>
+        <li>Locale is set through <code>setCurrentLocale</code>; request body still contains <code>currency</code> and optional <code>metadata</code>.</li>
+        <li><code>PaymentGateways</code> renders and selects exactly as before; <code>pg_list</code> and gateway count still work.</li>
+        <li><code>npm run build</code> (tsup) passes.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">bx-be-nestjs</h3>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li>First sync inserts the list in order; response returns <code>inserted</code>.</li>
+        <li>Re-running the same list changes nothing logically (same group content).</li>
+        <li>Removing a gateway removes the row; reordering updates <code>sort_order</code>.</li>
+        <li>Another metadata group and the NULL group are untouched.</li>
+        <li>Empty <code>gatewayIds</code> clears the group.</li>
+        <li>Duplicate / unknown / disabled / test-mismatched ids return 400 before delete.</li>
+        <li>Unknown entity returns 404.</li>
+        <li>Entity-config save no longer deletes metadata groups; mappings read excludes them.</li>
+        <li><code>donation_project_id</code> survives the request unchanged.</li>
+        <li><code>npm run build</code> / <code>nest build</code> passes.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">donations-be</h3>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li>Amount-step save triggers exactly one sync per entity.</li>
+        <li>Removing all gateways clears the group.</li>
+        <li>Missing <code>entityId</code> is skipped and logged.</li>
+        <li>Organization change does not leave a stale group on the old entity.</li>
+        <li>bx 4xx/5xx is logged without rolling back the project save; retry path is visible.</li>
+        <li>Caller token and <code>x-tenant-code</code> are forwarded.</li>
+        <li><code>npm run build</code> / <code>nest build</code> passes.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">donations-fe + caps-be</h3>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li>No change to the Amount-step payload shape; the saved selection still round-trips.</li>
+        <li>After PF-17708, the picker lists the real DX gateways and preselects the project's group.</li>
+        <li>caps-be <code>/fetch-gateways</code> with <code>{donation_project_id}</code> returns that project's group; without metadata returns the base group.</li>
+        <li>Non-matching metadata falls back to NULL rows; no NULL rows means <code>paylater</code> only.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b>Revised document</b> — prepared 12 Nov 2026 from the Slack DM review comments and verified against the latest <code>origin/dev</code> of each repo. No code changes were made.</div>
+    <div><b>Worktrees used:</b> <code>.pr-review-worktrees/{bx-be-nestjs,caps-ui,caps-be,donations-be,donations-fe,bx-fe}-PG-mapping-20261112</code></div>
+    <div><b>Source draft:</b> Jeeru Praveen, <i>Donations — PG Mapping Solution &amp; Action Items</i>, 11 Nov 2026.</div>
+    <div><b>Review comments:</b> Slack DM, 12 Nov 2026, 07:44–07:54 IST.</div>
+  </div>
+</footer>
+
+</body>
+</html>
